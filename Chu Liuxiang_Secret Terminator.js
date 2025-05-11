@@ -1,84 +1,155 @@
-//点击输入文字的输入框所在的位置
-const inputBoxPos = [1526, 1051];
-//确认按钮所在位置
-const confirmBtnPos = [1984,1051];
+//Click the position of the input box of the input text
 
-//所有的密令
-const allKeys = [
-    //2022.7.15 关山更新 入梦来新增
-    "满船明月从此去",
-    "长逝入君怀",
-    "相思始觉海非深",
-    //2021.7.9 入梦来新增
-    "江湖夜雨十年灯",
-    "岁岁常相见",
-    "只缘感君一回顾",
-    "寄我江南春色一枝梅",
-    "一寸相思一寸灰",
-    "聒碎乡心梦不成",
-    "相思似海深",
-    "碧雾濛濛度双燕",
-    "莫道君子意犹浅",
-    "几回魂梦与君同",
-    "间无地著相思",
-    "思公子兮未敢言",
-    "只有相思无尽处",
-    //上一次
-    "一春幽梦逐游丝",
-    "醉梦醺醺晓未苏",
-    "故山空复梦松楸",
-    "残霄犹得梦依稀",
-    "昨夜闲潭梦落花",
-    "梦里云归何处寻",
-    "夜深忽梦少年事",
-    "忽复乘舟梦日边",
-    "一梦江湖费五年",
-    //以下是旧的密令
-    "青山面目想依依",
-    "剑阁再题词",
-    "半夜清香入梦来",
-    "晓穿细仗又逢君",
-    "水石风林入梦思",
-    "东风柳色花香",
-    "掌上山川初入梦",
-    "一夜梦千回",
-    "尝闻彷佛入梦寐", //注意这不是仿佛
-    "梅花入梦来",
-    "濯锦江头频入梦",
-    "吟笔自欲图丹青",
-    "刀州重入梦",
-    "壶中日月尚经年",
-    //来自其它人
-    "醉后西园入梦",
-    "夜半醉香入梦来",
-    "秋钓清滩方入梦",
-    "桃花水面送归船",
-    "佳节又重阳",
-    //可能是新增的
-    "昨夜因何入梦来",
-    "满园花菊郁金黄"
+Const inputBoxPos = [1526, 1051];
+
+//Confirm the location of the button
+
+Const confirmBtnPos = [1984,1051];
+
+//All secret orders
+
+Const allKeys = [
+
+//2022.7.15 Guanshan update, enter the dream to add
+
+"From now on, the full boat of bright moon will go",
+
+"Long pass away into your arms",
+
+"Acacia begins to feel that the sea is not deep",
+
+//2021.7.9 Enter the dream to add
+
+"Jianghu Night Rain Ten Years Lamp",
+
+"We often see each other every year",
+
+"Only fate feels you look back",
+
+"Send me a plum in the south of the Yangtze River",
+
+"One inch of acacia and an inch of gray",
+
+"The dream of breaking the hometown will not come true",
+
+"Acacia is like the depth of the sea",
+
+"The blue mist is misty, double swallows",
+
+"Mo Dao, the gentleman's will is still shallow",
+
+"How many times the soul dream is the same as you",
+
+"There is no place with acacia",
+
+"Si Gongzi didn't dare to say it",
+
+"Only acacia is endless",
+
+//The last time
+
+"A spring dream chases the silk",
+
+"Drunken dream, drunk, Xiao Weisu",
+
+"The old mountain is empty and the dream of pine trees",
+
+"The residual sky is still vaguely dreaming",
+
+"Last night, the dream of falling flowers in Xiantan",
+
+"Where to find the clouds in the dream",
+
+"In the middle of the night, I suddenly dreamed of the youth's affairs",
+
+"Suddenly, take a boat and dream of the sun",
+
+"A dream of rivers and lakes costs five years",
+
+//The following is the old secret order
+
+"Qingshan's face wants to be followed",
+
+"Re-inscription of Jiange",
+
+"The fragrance comes into the dream in the middle of the night",
+
+"I'm going to meet you again,"
+
+"Water, stone, wind, forest into the dream",
+
+"East wind willow flower fragrance",
+
+"The mountains and rivers on the palm of the mountains and rivers for the first time",
+
+"A thousand dreams in one night",
+
+"It smells like a dream", //Note that it's not like
+
+"Plum blossoms come into the dream",
+
+"The head of the Jinjiang River often enters the dream",
+
+"Singing a pen and wanting to tu Danqing",
+
+"Daozhou re-enters the dream",
+
+"The sun and moon in the pot are still years old",
+
+//From other people
+
+"After being drunk, Xiyuan enters the dream",
+
+"In the middle of the night, the fragrance comes into the dream",
+
+"Autumn fishing on the clear beach is a dream",
+
+"Peach Blossom Water Return Ship",
+
+"The festival is heavy again",
+
+//It may be a new addition
+
+"Why did you dream last night",
+
+"The garden is full of flowers and chrysanthemums are golden"
+
 ];
 
+Function tryKey(key) {
 
-function tryKey(key) {
-    click(inputBoxPos[0], inputBoxPos[1]);
-    if (!className("android.widget.EditText").findOne(300)) {
-        //没有找到，说明密令已经解锁
-        return 1;
-    };
-    className("android.widget.EditText").findOnce().setText(key );
-    className("android.widget.Button").text("确定").findOne().click();
-    sleep(600);
-    click(confirmBtnPos[0],confirmBtnPos[1]);
-    sleep(20);
-return 0;
+click(inputBoxPos[0], inputBoxPos[1]);
 
+If (! className("android.widget.EditText").findOne(300)) {
+
+// Not found, indicating that the secret order has been unlocked.
+
+Return 1;
 
 };
 
-for (var i = 0; i < allKeys.length; i++) {
-    if (tryKey(allKeys[i])) {
-        toastLog("破解成功");  //脚本速度太快，
-        exit();
-    };
+className("android.widget.EditText").findOnce().setText(key);
+
+className("android.widget.Button").text("Determine").findOne().click();
+
+Sleep(600);
+
+click(confirmBtnPos[0],confirmBtnPos[1]);
+
+Sleep(20);
+
+Return zero;
+
+};
+
+For (var i = 0; i < allKeys.length; i++) {
+
+If (tryKey(allKeys[i])) {
+
+toastLog("Crack Success"); // The script speed is too fast,
+
+Exit ();
+
+};
+
 };
