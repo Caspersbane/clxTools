@@ -4,7 +4,7 @@ var { requireShared } = require("./src/requireShared.js");
 
 var runtimes = requireShared("runtimes.js");
 
-const Explain the text = "\
+const ExplainTheText = "\
 1. In order to click the screen and display the playback progress bar, this script requires a floating window, a background pop-up interface and barrier-free permissions. No other permissions are required. The script does not need to be networked and will not collect any data.\n\
 2. How to use: Click the button in the lower right corner to open the floating window, cut back to the game, and click the floating window to use it..\n\
 3. You can press the volume up key to end the operation at any time.\n\
@@ -15,7 +15,7 @@ const Explain the text = "\
 Music storage location: /sdcard/Chu Liuxiang Music Box Data Catalog\n\
 "
 
-const Explain the number of lines = Explain the text.split("\n").length;
+const ExplainTheNumberOfLines = ExplainTheText.split("\n").length;
 
 const projectUrl = "https://github.com/happyme531/clxTools";
 const anotherProjectUrl = "https://github.com/happyme531/GenshinImpactPianoExtract";
@@ -33,11 +33,11 @@ ui.layout(
         <vertical>
             {/* Title column */}
             <appbar>
-                <toolbar id="toolbar" title="楚留香音乐盒" />
+                <toolbar id="toolbar" title="Chu Liuxiang Music Box" />
             </appbar>
             {/* Scroll text description */}
             <ScrollView layout_weight="1" fadeScrollbars="false">
-                <text id="text" textSize="16dp" textColor={isDarkMode ? "#ffffff" : "#000000"} text={Explain the text} line={Explain the number of lines} />
+                <text id="text" textSize="16dp" textColor={isDarkMode ? "#ffffff" : "#000000"} text={ExplainTheText} line={ExplainTheNumberOfLines} />
             </ScrollView>
 
             {/* Drag the bar */}
@@ -46,7 +46,7 @@ ui.layout(
 
             {/* Bottom bar button */}
             <horizontal>
-                <button id="projectLinkBtn" text="打开项目主页" />
+                <button id="projectLinkBtn" text="Open the project homepage" />
             </horizontal>
 
             <text id="anotherProjectLinkText" textSize="16dp" textColor={isDarkMode ? "#ffffff" : "#000000"} text="Are you interested in learning about another project?" />
@@ -60,12 +60,12 @@ ui.layout(
     </frame>
 )
 
-ui.text.setText(Explain the text);
+ui.text.setText(ExplainTheText);
 let floatWindowSize = 36;
 ui.seekbar.setOnSeekBarChangeListener({
     onProgressChanged: function (seekBar, progress, fromUser) {
         floatWindowSize = progress;
-        ui.barDesc.setText("悬浮窗大小调节: " + progress);
+        ui.barDesc.setText("The size adjustment of the floating window: " + progress);
     }
 });
 
@@ -96,7 +96,7 @@ let canExit = false;
 let canExitTimeout = null;
 ui.emitter.on("back_pressed", (e) => {
     if (!canExit) {
-        toast("再按一次退出");
+        toast("Press again to exit");
         canExit = true;
         canExitTimeout = setTimeout(() => {
             canExit = false;
