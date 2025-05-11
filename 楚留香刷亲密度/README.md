@@ -1,11 +1,19 @@
-## 楚留香刷亲密度
-#### 一个自动为好友发消息，用来刷亲密度的脚本，并且也能用来刷信誉积分
-#### 完成度似乎不错
-****************
-### 特色功能:
+## Chu Liu's fragrance brush intimacy
 
-+ 可调的发送速度
-+ 自定义发送内容
-+ 发送内容中包含时间，当前条数，或者随机一句古诗
-+ 随机发送自定义的文本(custom.txt), 预置：舔狗语录
-+ 发完自动关屏(需要root)
+#### A script that automatically sends messages to friends, is used to brush intimacy, and can also be used to brush credit points.
+
+#### The completion seems to be good.
+
+****************
+
+### Features:
+
++ ADJUSTABLE SENDING SPEED
+
++ Custom send content
+
++ The sent content includes the time, the current number of articles, or a random ancient poem
+
++ Randomly send custom text (custom.txt), preset: licking dog quotes
+
++ Automatically turn off the screen after sending (root is required)
