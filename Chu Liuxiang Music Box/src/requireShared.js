@@ -1,7 +1,8 @@
 
 /**
- * 加载共享的js文件, 和require类似，用来解决几个项目共享js文件的问题。
- * 安卓不能软链接，如果把共享的js文件放上一个目录，打包之后就找不到了。
+ * Loading shared js files, similar to require, is used to solve the problem of several projects sharing js files.
+
+* Android can't be soft-linked. If you put the shared js file in a directory, you can't find it after packaging.
  * @param {string} fileName
  */
 function requireShared(fileName) {
@@ -22,7 +23,7 @@ function requireShared(fileName) {
     }
     let sharedDir = files.path(sharedDirRel);
     let cacheDir = files.path(cacheDirRel);
-    //检查是否在/data/user/目录下运行，如果是，则使用备用目录 (调试用)
+    //Check whether it is running in the /data/user/ directory. If so, use the backup directory (for debugging)
     console.log(files.cwd());
     if (files.cwd().startsWith("/data/user/")) {
         sharedDir = alternativeSharedDir;
@@ -31,22 +32,22 @@ function requireShared(fileName) {
     let sourceExists = files.exists(sharedDir + fileName);
     let cacheExists = files.exists(cacheDir + fileName);
     if (sourceExists && !cacheExists) {
-        console.log("复制共享文件夹");
+        console.log("Copy the shared folder");
         copyDir(sharedDir, cacheDir);
         return require(cacheDir + fileName);
     } else if (!sourceExists && cacheExists) {
-        //如果共享文件不存在，但是缓存文件存在，则直接加载缓存文件（打包之后，共享文件会丢失）
-        console.log("共享文件不存在，加载缓存文件: " + fileName);
+        //If the shared file does not exist, but the cache file exists, the cache file will be loaded directly (after packaging, the shared file will be lost)
+        console.log("The shared file does not exist. Load the cache file.: " + fileName);
         return require(cacheDir + fileName);
     } else if (!sourceExists && !cacheExists) {
-        throw new Error("共享文件不存在: " + fileName);
+        throw new Error("The shared file does not exist.: " + fileName);
     }
 
-    //都存在，检查是否有更新
+    //All of them exist. Check whether there are updates.
     let sourceLastModified = java.nio.file.Files.getLastModifiedTime(java.nio.file.Paths.get(sharedDir + fileName)).toMillis();
     let cacheLastModified = java.nio.file.Files.getLastModifiedTime(java.nio.file.Paths.get(cacheDir + fileName)).toMillis();
     if (sourceLastModified > cacheLastModified) {
-        console.log("共享文件有更新: " + fileName);
+        console.log("The shared file has been updated.: " + fileName);
         copyDir(sharedDir, cacheDir);
     }
     return require(cacheDir + fileName);
