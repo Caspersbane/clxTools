@@ -24,7 +24,7 @@
       "background_start",
       "draw_overlay"
     ],
-    "serviceDesc": "脚本需要无障碍服务来点击屏幕。",
+    "serviceDesc": "The script needs a barrier-free service to click on the screen.",
     "splashText": "Powered by Autoxjs.com"
   },
   "libs": [
@@ -32,7 +32,7 @@
     "libjackpal-termexec2.so"
   ],
   "main": "uiLauncher.js",
-  "name": "楚留香音乐盒",
+  "name": "Chu Liuxiang Music Box",
   "packageName": "dev.happyme531.clxmidiplayer",
   "scripts": {},
   "versionCode": 41,
