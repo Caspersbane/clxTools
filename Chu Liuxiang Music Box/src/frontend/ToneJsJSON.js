@@ -1,12 +1,12 @@
 function ToneJsJSONParser() {
     /**
-     * @brief 从JSON对象中解析音乐数据
-     * @param {object} jsonData JSON数据
+     * @brief Parse music data from JSON objects
+     * @param {object} jsonData JSONdata
      */
     this.parseFromJSON = function (jsonData) {
         let trackCount = jsonData.tracks.length;
         let tracksData = [];
-        // Tone.js会把同一个音轨, 不同Channel的音符分开
+        // Tone.js will separate the notes of the same sound track and different channels.
         for (let i = 0; i < trackCount; i++) {
             let track = jsonData.tracks[i];
             /** @type {import("../noteUtils").Note[]} */
@@ -38,7 +38,7 @@ function ToneJsJSONParser() {
     }
 
     /**
-     * @brief 从字符串中解析音乐数据
+     * @brief Parse music data from strings
      */
     this.parseFromString = function (/** @type {string} */ musicData) {
         let jsonData;
@@ -46,22 +46,22 @@ function ToneJsJSONParser() {
             jsonData = JSON.parse(musicData);
             return this.parseFromJSON(jsonData);
         } catch (err) {
-            toast("文件解析失败！请检查格式是否正确");
+            toast("File parsing failed! Please check whether the format is correct.");
             toast(err);
-            console.error("文件解析失败:" + err + ",数据文件可能缺失或不完整！");
+            console.error("File parsing failed:" + err + ",Data files may be missing or incomplete.！");
         };
     }
 
     /**
-     * @brief 解析一个文件
-     * @param {string} filePath 文件路径
-     * @returns {import("../musicFormats").TracksData} 音乐数据
+     * @brief Parse a file
+     * @param {string} filePath File path
+     * @returns {import("../musicFormats").TracksData} Music data
      */
     this.parseFile = function (filePath) {
         try {
             return this.parseFromString(files.read(filePath));
         } catch (err) {
-            throw new Error("文件解析失败！请检查格式是否正确, " + err.message);
+            throw new Error("File parsing failed! Please check whether the format is correct. " + err.message);
         };
     };
 }
