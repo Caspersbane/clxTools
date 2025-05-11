@@ -4,18 +4,18 @@ var { requireShared } = require("./src/requireShared.js");
 
 var runtimes = requireShared("runtimes.js");
 
-const 说明文字 = "\
-1. 为了点击屏幕与显示播放进度条, 此脚本需要悬浮窗,后台弹出界面与无障碍权限. 其它权限均不需要. 脚本无需联网, 不会收集任何数据.\n\
-2. 使用方法: 点击右下角按钮打开悬浮窗, 切回游戏, 点击悬浮窗即可使用.\n\
-3. 你可以随时按音量上键结束运行.\n\
-4. 脚本制作: 楚留香(一梦江湖)::声声慢::心慕流霞::李芒果. \n\
-5. 此脚本是开源项目, 欢迎fork, star, issue, pr. \n\
-6. 感谢autoX.js作者提供的框架.\n\
+const Explain the text = "\
+1. In order to click the screen and display the playback progress bar, this script requires a floating window, a background pop-up interface and barrier-free permissions. No other permissions are required. The script does not need to be networked and will not collect any data.\n\
+2. How to use: Click the button in the lower right corner to open the floating window, cut back to the game, and click the floating window to use it..\n\
+3. You can press the volume up key to end the operation at any time.\n\
+4. Script production: Chu Liuxiang (A Dream of Jianghu):: Slow Voice:: Xinmu Liuxia:: Li Mango. \n\
+5. This script is an open source project, welcome fork, star, issue, pr. \n\
+6. Thanks to the framework provided by the author of autoX.js.\n\
 \n\
-音乐存储位置: /sdcard/楚留香音乐盒数据目录 \n\
+Music storage location: /sdcard/Chu Liuxiang Music Box Data Catalog\n\
 "
 
-const 说明文字行数 = 说明文字.split("\n").length;
+const Explain the number of lines = Explain the text.split("\n").length;
 
 const projectUrl = "https://github.com/happyme531/clxTools";
 const anotherProjectUrl = "https://github.com/happyme531/GenshinImpactPianoExtract";
@@ -31,36 +31,36 @@ try {
 ui.layout(
     <frame bg={isDarkMode ? "#000000" : "#ffffff"}>
         <vertical>
-            {/* 标题栏 */}
+            {/* Title column */}
             <appbar>
                 <toolbar id="toolbar" title="楚留香音乐盒" />
             </appbar>
-            {/* 滚动文字说明 */}
+            {/* Scroll text description */}
             <ScrollView layout_weight="1" fadeScrollbars="false">
-                <text id="text" textSize="16dp" textColor={isDarkMode ? "#ffffff" : "#000000"} text={说明文字} line={说明文字行数} />
+                <text id="text" textSize="16dp" textColor={isDarkMode ? "#ffffff" : "#000000"} text={Explain the text} line={Explain the number of lines} />
             </ScrollView>
 
-            {/* 拖动条 */}
-            <text id="barDesc" textSize="16dp" textColor={isDarkMode ? "#ffffff" : "#000000"} text="悬浮窗大小调节: 36" />
+            {/* Drag the bar */}
+            <text id="barDesc" textSize="16dp" textColor={isDarkMode ? "#ffffff" : "#000000"} text="The size adjustment of the floating window: 36" />
             <seekbar id="seekbar" max="100" progress="36" />
 
-            {/* 底栏按钮 */}
+            {/* Bottom bar button */}
             <horizontal>
                 <button id="projectLinkBtn" text="打开项目主页" />
             </horizontal>
 
-            <text id="anotherProjectLinkText" textSize="16dp" textColor={isDarkMode ? "#ffffff" : "#000000"} text="有兴趣了解一下另一个项目吗?" />
+            <text id="anotherProjectLinkText" textSize="16dp" textColor={isDarkMode ? "#ffffff" : "#000000"} text="Are you interested in learning about another project?" />
             <horizontal>
-                <button id="anotherProjectLinkBtn" text="打开自动扒谱项目主页" />
+                <button id="anotherProjectLinkBtn" text="Open the homepage of the automatic score picking project" />
             </horizontal>
 
         </vertical>
-        {/* 右下角启动按钮 */}
+        {/* Start button in the lower right corner */}
         <fab id="launchBtn" w="auto" h="auto" src="@drawable/ic_launch_black_48dp" margin="16" layout_gravity="bottom|right" tint="#ffffff" />
     </frame>
 )
 
-ui.text.setText(说明文字);
+ui.text.setText(Explain the text);
 let floatWindowSize = 36;
 ui.seekbar.setOnSeekBarChangeListener({
     onProgressChanged: function (seekBar, progress, fromUser) {
