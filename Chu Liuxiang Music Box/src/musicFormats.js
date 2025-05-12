@@ -1,30 +1,30 @@
 //@ts-check
 /* 
- * musicFormats.js -- 关于音乐盒支持的音乐格式
+ * musicFormats.js -- About the music formats supported by the music box
  *
  *  Copyright (C) 2021 hallo1 
  * 
  */
 
 /*
- 1. Tone.js JSON 格式:
-    扩展名为.json的音乐文件将被解析为 Tone.js JSON 格式
-    目前, 此脚本对该格式的支持很好, 一般都可以正常解析
-    更多详情请参考: https://tonejs.github.io/
+ 1. Tone.js JSON format:
+    Music files with the .json extension will be parsed to Tone.js JSON format
+    At the moment, this script supports the format very well, and it can generally be parsed normally
+    For more details, please refer to : https://tonejs.github.io/
 
- 2. 标准 MIDI 格式:
-    扩展名为.mid的音乐文件将被解析为标准 MIDI 格式
-    目前, 此脚本对该格式的支持并不是很好, 某些情况下可能无法正常解析
-    如果发现无法正常解析, 可以在https://tonejs.github.io/Midi/ 将此音乐文件转换为 Tone.js JSON 格式
+ 2. Standard MIDI Format:
+    Music files with the .mid extension will be parsed to standard MIDI format
+    Currently, this script does not support the format very well, and may not resolve properly in some cases
+    If you find that it doesn't parse properly, you can convert this music file to Tone.js JSON format https://tonejs.github.io/Midi/
 
- 3. 变奏的梦想格式:
-    网易云音乐作者 变奏的梦想 发布的音乐的歌词的音乐格式
-    请参考 https://music.163.com/#/artist?id=1085053
-    将歌词全部内容粘贴到文本文件中, 并保存为.txt格式, 即可正常解析
+ 3. Variations of the dream format:
+    NetEase Cloud Music Author Variations of the Dream music published in music format for lyrics
+    Please refer to it https://music.163.com/#/artist?id=1085053
+    Paste the entire lyrics into a text file and save them in .txt format to parse them normally
 
- 4. DoMiSo格式
-    格式设计者为 nigh@github.com , 参见 https://github.com/Nigh/DoMiSo-genshin
-    只支持解析.txt(文本)格式的音乐文件
+ 4. DoMiSo format
+    The format was designed by nigh@github.com , see https://github.com/Nigh/DoMiSo-genshin
+    Only music files in .txt (text) format can be parsed
 
 */
 
@@ -32,12 +32,12 @@
  * @enum {string}
  */
 const NoteDurationType = {
-    "none": "none", // 完全不支持
-    "native": "native", // 原生支持
+    "none": "none", // Not at all
+    "native": "native", // Native support
 }
 
 /**
- * 一些类型定义
+ * Some type definitions
  * @typedef {{
  * name: string, 
  * channel: number,
@@ -103,26 +103,26 @@ function MusicFormats() {
             "haveDurationInfo": false,
             "haveTracks": false
         }];
-    
+
     /**
-     * @brief 获取文件的音乐格式
-     * @param {string} fullFileName 文件名(包含扩展名)
-     * @returns {MusicFormat} 音乐格式
+     * @brief Get the music format of the file
+     * @param {string} fullFileName File name (including extension)
+     * @returns {MusicFormat} Music format
      */
-    this.getFileFormat = function(fullFileName) {
+    this.getFileFormat = function (fullFileName) {
         for (let format of formats) {
             if (fullFileName.endsWith(format.fileExtension))
                 return format;
         }
-        throw new Error("不支持的文件格式");
+        throw new Error("Unsupported file formats");
     }
 
     /**
-     * @brief 判断文件是否为音乐文件
-     * @param {string} fullFileName 文件名(包含扩展名)
-     * @returns {boolean} 是否为音乐文件
+     * @brief Determine whether the file is a music file
+     * @param {string} fullFileName File name (including extension)
+     * @returns {boolean} Whether it is a music file or not
      */
-    this.isMusicFile = function(fullFileName) {
+    this.isMusicFile = function (fullFileName) {
         for (let format of formats) {
             if (fullFileName.endsWith(format.fileExtension))
                 return true;
@@ -131,14 +131,14 @@ function MusicFormats() {
     }
 
     /**
-     * @brief 获取不包含扩展名也不包含路径的文件名(针对音乐文件)
-     * @param {string} fullFileName 文件名(包含扩展名)
-     * @returns {string} 不包含扩展名以及路径的文件名
+     * @brief Get a file name that doesn't contain an extension or a path(For music files)
+     * @param {string} fullFileName File name (including extension)
+     * @returns {string} The file name that does not contain the extension as well as the path
      * @example
      * getFileNameWithoutExtension("tmp/music1.mid") -> "music1"
      * getFileNameWithoutExtension("music2.mid") -> "music2"
      */
-    this.getFileNameWithoutExtension = function(fullFileName) {
+    this.getFileNameWithoutExtension = function (fullFileName) {
         let ret = fullFileName;
         if (this.isMusicFile(fullFileName)) {
             let fileFormat = this.getFileFormat(fullFileName);
@@ -149,11 +149,11 @@ function MusicFormats() {
 
 
     /**
-     * 解析音乐文件
+     * Parse music files
      * @param {string} filePath 
-     * @returns {TracksData} 音乐数据
+     * @returns {TracksData} Music data
      */
-    this.parseFile = function(filePath) {
+    this.parseFile = function (filePath) {
         let fileFormat = this.getFileFormat(filePath);
         switch (fileFormat.name) {
             case "tonejsjson":
@@ -161,21 +161,21 @@ function MusicFormats() {
             case "midi":
                 return new MidiParser().parseFile(filePath);
             case "domiso":
-                return new DoMiSoTextParser().parseFile(filePath,undefined);
+                return new DoMiSoTextParser().parseFile(filePath, undefined);
             case "skystudiojson":
                 return new SkyStudioJSONParser().parseFile(filePath);
             default:
-                throw new Error("不支持的文件格式");
+                throw new Error("Unsupported file formats");
         }
     }
 
     /**
-     * @brief 从字符串中解析音乐数据
-     * @param {string} musicData 音乐数据
-     * @param {string} formatName 音乐格式名称
-     * @returns {TracksData} 音乐数据
+     * @brief Parse music data from strings
+     * @param {string} musicData Music data
+     * @param {string} formatName The name of the music format
+     * @returns {TracksData} Music data
      */
-    this.parseFromString = function(musicData, formatName) {
+    this.parseFromString = function (musicData, formatName) {
         switch (formatName) {
             case "tonejsjson":
                 return new ToneJsJSONParser().parseFromString(musicData);
@@ -184,7 +184,7 @@ function MusicFormats() {
             case "skystudiojson":
                 return new SkyStudioJSONParser().parseFromString(musicData);
             default:
-                throw new Error("不支持的文件格式");
+                throw new Error("Unsupported file formats");
         }
     }
 }

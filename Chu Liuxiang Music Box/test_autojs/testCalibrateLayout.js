@@ -1,33 +1,33 @@
-// 测试校准布局功能
+// Test the calibration layout function
 const calibrateLayout = require("../src/ui/calibrateLayout.js");
 
-// 测试用的归一化坐标点
+// Normalized coordinate points for testing
 const testPoints = [
-    [0.5, 0.5],    // 中心点
-    [0, 0],        // 左上角
-    [1, 0],        // 右上角
-    [0, 1],        // 左下角
-    [1, 1],        // 右下角
-    [0.25, 0.25],  // 左上1/4
-    [0.75, 0.75]   // 右下3/4
+    [0.5, 0.5],    // center
+    [0, 0],        // Top left
+    [1, 0],        // Top right corner
+    [0, 1],        // Bottom left
+    [1, 1],        // Bottom right
+    [0.25, 0.25],  // Top left 1/4
+    [0.75, 0.75]   // Bottom right 3/4
 ];
 
-// 运行测试
+// Run the test
 function runTest() {
-    console.log("开始测试 calibrateLayout");
-    console.log("测试点:", testPoints);
-    
-    // 调用校准函数
+    console.log("Start testing calibrateLayout");
+    console.log("Test points:", testPoints);
+
+    // Call the calibration function
     let result = calibrateLayout(
-        "请调整定位点位置\n参考点包括: 中心点、四个角和两个1/4点", 
+        "Adjust the anchor position\n Reference points include:: Center point, four corners, and two 1/4 points",
         testPoints
     );
-    
-    // 显示结果
-    console.log("校准结果:");
-    console.log("左上点:", result.pos1);
-    console.log("右下点:", result.pos2);
+
+    // Display the results
+    console.log("Calibration results:");
+    console.log("Top left:", result.pos1);
+    console.log("Bottom right point:", result.pos2);
 }
 
-// 执行测试
+// Perform the test
 runTest();

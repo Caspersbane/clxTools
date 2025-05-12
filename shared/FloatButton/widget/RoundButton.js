@@ -1,10 +1,10 @@
 /*
- * @Author: 大柒
+ * @Author: Daqi
  * @QQ: 531310591@qq.com
  * @Date: 2021-04-18 04:34:46
  * @Version: Auto.Js Pro
- * @Description: 自定义控件 按钮
- * @LastEditors: 大柒
+ * @Description: Customize the Controls button
+ * @LastEditors: Daqi
  * @LastEditTime: 2021-04-19 12:19:40
  */
 

@@ -1,10 +1,10 @@
 /*
- * @Author: 大柒
+ * @Author: Daqi
  * @QQ: 531310591@qq.com
  * @Date: 2021-04-18 05:27:34
  * @Version: Auto.Js Pro
- * @Description: 创建圆形按钮
- * @LastEditors: 大柒
+ * @Description: Create a circular button
+ * @LastEditors: Daqi
  * @LastEditTime: 2021-04-19 12:19:02
  */
 

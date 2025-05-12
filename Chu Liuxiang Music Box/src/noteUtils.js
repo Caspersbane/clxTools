@@ -3,7 +3,7 @@
 Array.prototype;
 
 /**
- * @brief 获取数组的子数组(引用)
+ * @brief Get a subarray of an array (reference)
  */
 Object.defineProperty(Array.prototype, 'subarray', {
     value: function (/** @type {number} */ i, /** @type {number} */ j) {
@@ -29,18 +29,18 @@ Object.defineProperty(Array.prototype, 'subarray', {
 
 /** 
  * @typedef {[pitch: number, startTime: number, attributes: Object.<string,Object>]} Note
- * @typedef {[keyIndex: number, startTime: number, attributes: Object.<string,Object>]} Key // 按键
+ * @typedef {[keyIndex: number, startTime: number, attributes: Object.<string,Object>]} Key // keystroke
  * @typedef {Note|Key} NoteLike
  * @typedef {[pitches: number[], startTime: number, attributes: Object.<string,Object>|undefined]} PackedNote
- * @typedef {[keyIndexes: number[], startTime: number, attributes: Object.<string,Object>|undefined]} PackedKey // 按键
+ * @typedef {[keyIndexes: number[], startTime: number, attributes: Object.<string,Object>|undefined]} PackedKey // keystroke
  * @typedef {PackedNote|PackedKey} PackedNoteLike
  */
 
 function NoteUtils() {
     /**
-     * @brief 将绝对时间的音符数据转换为相对时间的音符数据(每个音符的时间代表与上一个音符的时间差)
-     * @param {Array<NoteLike>} noteData - 音乐数据(会被修改)
-     * @returns {Array<NoteLike>} - 返回相对时间的音符数据
+     * @brief Converts note data in absolute time to note data in relative time (the time of each note represents the time difference from the previous note)
+     * @param {Array<NoteLike>} noteData - Music data (will be modified)
+     * @returns {Array<NoteLike>} - Returns note data relative to time
      */
     this.toRelativeTime = function (noteData) {
         let lastTime = 0;
@@ -53,9 +53,9 @@ function NoteUtils() {
     }
 
     /**
-     * @brief 将相对时间的音符数据转换为绝对时间的音符数据
-     * @param {Array<NoteLike>} noteData - 音乐数据(会被修改)
-     * @returns {Array<NoteLike>} - 返回绝对时间的音符数据
+     * @brief Converts note data of relative time to note data of absolute time
+     * @param {Array<NoteLike>} noteData - Music data (will be modified)
+     * @returns {Array<NoteLike>} - Note data that returns absolute time
      */
     this.toAbsoluteTime = function (noteData) {
         let curTime = 0;
@@ -68,10 +68,10 @@ function NoteUtils() {
     }
 
     /**
-     * @brief 删除指定位置的音符
-     * @param {Array<NoteLike>} noteData - 音乐数据(会被修改)
-     * @param {number} index - 要删除的音符的位置
-     * @returns {Array<NoteLike>} - 返回删除后的音符数据
+     * @brief Deletes the note at the specified position
+     * @param {Array<NoteLike>} noteData - Music data (will be modified)
+     * @param {number} index - The position of the note to be deleted
+     * @returns {Array<NoteLike>} - Returns the deleted note data
      */
     this.deleteNoteAt = function (noteData, index) {
         noteData.splice(index, 1);
@@ -79,10 +79,10 @@ function NoteUtils() {
     }
 
     /**
-     * @brief "软"删除指定位置的音符, 不改变数组长度
-     * @param {Array<NoteLike>} noteData - 音乐数据(会被修改)
-     * @param {number} index - 要删除的音符的位置
-     * @returns {Array<NoteLike>} - 返回删除后的音符数据
+     * @brief "Soft" deletes notes at the specified position without changing the array length
+     * @param {Array<NoteLike>} noteData - Music data (will be modified)
+     * @param {number} index - The position of the note to be deleted
+     * @returns {Array<NoteLike>} - Returns the deleted note data
      */
     this.softDeleteNoteAt = function (noteData, index) {
         if (noteData[index][2] == undefined) {
@@ -94,8 +94,8 @@ function NoteUtils() {
     }
 
     /**
-     * @brief "软"删除指定音符
-     * @param {NoteLike} note - 要删除的音符
+     * @brief Soft deletes the specified note
+     * @param {NoteLike} note - The note you want to delete
      */
     this.softDeleteNote = function (note) {
         if (note[2] == undefined) {
@@ -106,11 +106,11 @@ function NoteUtils() {
     }
 
     /**
-     * @brief "软"更改指定位置的音符的时间
-     * @param {Array<NoteLike>} noteData - 音乐数据(会被修改)
-     * @param {number} index - 要更改的音符的位置
-     * @param {number} time - 新的时间
-     * @returns {Array<NoteLike>} - 返回更改后的音符数据
+     * @brief Soft changes the time of the note at the specified position
+     * @param {Array<NoteLike>} noteData - Music data (will be modified)
+     * @param {number} index - The position of the note you want to change
+     * @param {number} time - New time
+     * @returns {Array<NoteLike>} - Returns the changed note data
      */
     this.softChangeNoteTimeAt = function (noteData, index, time) {
         if (noteData[index][2] == undefined) {
@@ -122,9 +122,9 @@ function NoteUtils() {
     }
 
     /**
-     * @brief "软"更改指定音符的时间
-     * @param {NoteLike} note - 要更改的音符
-     * @param {number} time - 新的时间
+     * @brief Soft changes the time of the specified note
+     * @param {NoteLike} note - The note you want to change
+     * @param {number} time - New time
      */
     this.softChangeNoteTime = function (note, time) {
         if (note[2] == undefined) {
@@ -135,9 +135,9 @@ function NoteUtils() {
     }
 
     /**
-     * @brief 使更改生效
-     * @param {Array<NoteLike>} noteData - 音乐数据(会被修改)
-     * @returns {Array<NoteLike>} - 返回删除后的音符数据
+     * @brief Make the changes effective
+     * @param {Array<NoteLike>} noteData - Music data (will be modified)
+     * @returns {Array<NoteLike>} - Returns the deleted note data
      */
     this.applyChanges = function (noteData) {
         for (let i = 0; i < noteData.length; i++) {
@@ -161,10 +161,10 @@ function NoteUtils() {
     }
 
     /**
-     * @brief 获取下一组音符的开始位置
-     * @param {Array<NoteLike>} noteData - 音乐数据
-     * @param {number} index - 当前音符的位置
-     * @returns {number} - 返回下一组音符的开始位置
+     * @brief Gets the start position of the next set of notes
+     * @param {Array<NoteLike>} noteData - Music data
+     * @param {number} index - The position of the current note
+     * @returns {number} - Return to the start of the next set of notes
      */
     this.nextChordStart = function (noteData, index) {
         const eps = 1; // 1ms
@@ -177,9 +177,9 @@ function NoteUtils() {
     }
 
     /**
-     * @brief 音符组迭代器
-     * @param {Array<NoteLike>} noteData - 音乐数据
-     * @returns {IterableIterator<Array<NoteLike>>} - 返回音符组迭代器
+     * @brief Note group iterators
+     * @param {Array<NoteLike>} noteData - Music data
+     * @returns {IterableIterator<Array<NoteLike>>} - Return to the note group iterator
      */
     this.chordIterator = function* (noteData) {
         let index = 0;
@@ -191,9 +191,9 @@ function NoteUtils() {
     }
 
     /**
-     * @brief 将分散的音符组合并为连续的音符
-     * @param {Array<NoteLike>} noteData - 音乐数据
-     * @returns {Array<PackedNoteLike>} - 返回合并后的音符数据
+     * @brief Combine scattered notes into continuous notes
+     * @param {Array<NoteLike>} noteData - Music data
+     * @returns {Array<PackedNoteLike>} - Returns the merged note data
      */
     this.packNotes = function (noteData) {
         let packedNoteData = [];
@@ -205,7 +205,7 @@ function NoteUtils() {
             keys.forEach((key) => {
                 keyArray.push(key[0]);
                 attributes.push(key[2]);
-                if(key[2].lyric != undefined) {
+                if (key[2].lyric != undefined) {
                     attributes[0].lyric = key[2].lyric;
                     // console.verbose("lyric: " + JSON.stringify(attributes));
                     // key[2].lyric = undefined;
@@ -218,22 +218,22 @@ function NoteUtils() {
     }
 
     /**
-     * @brief 查找给定时间最接近的一组音符的起始索引
-     * @param {Array<NoteLike>} noteData - 音乐数据
-     * @param {number} timems - 目标时间（毫秒）
-     * @returns {number} - 返回最接近的一组音符的起始索引
+     * @brief Finds the starting index of the set of notes closest to each other at a given time
+     * @param {Array<NoteLike>} noteData - Music data
+     * @param {number} timems - Target Time (ms)
+     * @returns {number} - Returns the starting index of the closest set of notes
      */
     this.findChordStartAtTime = function (noteData, timems) {
-        const eps = 1; // 1ms 阈值
+        const eps = 1; // 1ms threshold
 
-        // 二分查找
+        // Binary search
         let left = 0;
         let right = noteData.length - 1;
 
         while (left <= right) {
             let mid = Math.floor((left + right) / 2);
             if (noteData[mid][1] === timems) {
-                // 找到精确匹配，现在向前查找该组的第一个音符
+                // Find the exact match, now look forward to the first note of the group
                 while (mid > 0 && Math.abs(noteData[mid][1] - noteData[mid - 1][1]) <= eps) {
                     mid--;
                 }
@@ -245,9 +245,9 @@ function NoteUtils() {
             }
         }
 
-        // 没有找到精确匹配，left 是插入点
+        // No exact match found, left is the insertion point
         if (left >= noteData.length) {
-            // 如果 timems 大于所有音符的时间，返回最后一组音符的起始索引
+            // If timems is greater than the time of all notes, returns the starting index of the last set of notes
             let lastIndex = noteData.length - 1;
             while (lastIndex > 0 && Math.abs(noteData[lastIndex][1] - noteData[lastIndex - 1][1]) <= eps) {
                 lastIndex--;
@@ -256,14 +256,14 @@ function NoteUtils() {
         }
 
         if (left === 0) {
-            // 如果 timems 小于所有音符的时间，返回第一个音符的索引
+            // If the timems are less than the time of all notes, the index of the first note is returned
             return 0;
         }
 
-        // 检查 left-1 和 left 哪个更接近 timems
+        // Check which is closer to timems between left-1 and left
         if (Math.abs(noteData[left - 1][1] - timems) <= Math.abs(noteData[left][1] - timems)) {
-            // left-1 更接近
-           left--;
+            // left-1 Closer
+            left--;
         }
 
         while (left > 0 && Math.abs(noteData[left][1] - noteData[left - 1][1]) <= eps) {
@@ -273,9 +273,9 @@ function NoteUtils() {
     }
 
     /**
-     * @brief 获取"可转移"的属性, 如果原音符被删除, 这些属性应该被转移到新音符上。
-     * @param {NoteLike} note - 音符
-     * @returns {Object.<string,Object>?} - 返回"可转移"的属性, 如果没有则返回null
+     * @brief Gets "transferable" properties, which should be transferred to the new note if the original note is deleted.
+     * @param {NoteLike} note - musical notes
+     * @returns {Object.<string,Object>?} - Returns a "transferable" property, or null if not
      */
     this.getTransferableAttributes = function (note) {
         let transferableAttributes = {};

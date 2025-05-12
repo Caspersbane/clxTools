@@ -22,7 +22,7 @@ function MidiDeviceManager() {
             let midiDeviceInfo = midiDevices[i];
             let midiDeviceName = midiDeviceInfo.getProperties().getString(MidiDeviceInfo.PROPERTY_NAME);
             if (midiDeviceName === "" || midiDeviceName === null) {
-                midiDeviceName = "未命名";
+                midiDeviceName = "nameless";
             }
             midiDeviceNames.push(midiDeviceName);
         }
@@ -34,10 +34,10 @@ function MidiDeviceManager() {
         let midiDeviceInfo = midiDevices[midiDeviceIndex];
         let portInfos = midiDeviceInfo.getPorts();
         for (let i = 0; i < portInfos.length; i++) {
-            if (portInfos[i].getType() === MidiDeviceInfo.PortInfo.TYPE_OUTPUT) { //Output是相对于对方设备的输出端口, 因此在这里用于输入
+            if (portInfos[i].getType() === MidiDeviceInfo.PortInfo.TYPE_OUTPUT) { //Output is the output port relative to the other device, so it is used here for input
                 let midiPortName = portInfos[i].getName();
-                if (midiPortName === ""|| midiPortName === null) {
-                    midiPortName = "未命名";
+                if (midiPortName === "" || midiPortName === null) {
+                    midiPortName = "nameless";
                 }
                 midiPortNames.push(midiPortName);
             }
@@ -51,34 +51,34 @@ function MidiDeviceManager() {
     let msgBuffer = [];
     let midiReceiver = new android.media.midi.MidiReceiver(
         {
-            onSend: function (msg, offset, cnt, timeStamp) {    
-                let arr = [];   //这里如果用Uint8Array也会卡死
-                for (let i = 0; i < cnt+offset; i++) {
+            onSend: function (msg, offset, cnt, timeStamp) {
+                let arr = [];   //If you use Uint8Array here, it will also freeze
+                for (let i = 0; i < cnt + offset; i++) {
                     arr.push(msg[i]);
                 }
                 pktBufferLock.lock();
                 pktBuffer.push([arr, offset, cnt, timeStamp]);
                 pktBufferLock.unlock();
-                if(_dataReceivedCallback != null){
+                if (_dataReceivedCallback != null) {
                     _dataReceivedCallback();
                 }
             }
         });
     this.openDevicePort = function (midiDeviceIndex, midiPortIndex) {
         let midiDeviceInfo = midiManager.getDevices()[midiDeviceIndex];
-        
+
         let deviceOpenListener = new MidiManager.OnDeviceOpenedListener({
             onDeviceOpened: function (dev) {
-                if(dev === null){
-                    throw new Error("打开设备失败:" + dev);
+                if (dev === null) {
+                    throw new Error("Failed to turn on the device:" + dev);
                     return;
                 }
                 device = dev;
             }
         });
-        midiManager.openDevice(midiDeviceInfo,deviceOpenListener,null);
-        while(device === null){
-            console.log("等待设备连接...");
+        midiManager.openDevice(midiDeviceInfo, deviceOpenListener, null);
+        while (device === null) {
+            console.log("Wait for the device to connect...");
             sleep(100);
         }
         outputPort = device.openOutputPort(midiPortIndex);
@@ -86,12 +86,12 @@ function MidiDeviceManager() {
     }
     this.dataAvailable = function () {
         pktBufferLock.lock();
-        while(pktBuffer.length > 0){
+        while (pktBuffer.length > 0) {
             let pkt = pktBuffer.shift();
             midiFramer.parse(new Uint8Array(pkt[0]), pkt[1], pkt[2], pkt[3]);
         }
         pktBufferLock.unlock();
-        while(midiFramer.dataAvailable()){
+        while (midiFramer.dataAvailable()) {
             msgBuffer.push(midiFramer.read());
         }
         return msgBuffer.length;
@@ -103,13 +103,13 @@ function MidiDeviceManager() {
     }
     this.readAll = function () {
         let data = [];
-        while(msgBuffer.length > 0){
+        while (msgBuffer.length > 0) {
             data.push(new Uint8Array(msgBuffer.shift()[0]));
         }
         return data;
     }
 
-    this.setDataReceivedCallback = function(callback){
+    this.setDataReceivedCallback = function (callback) {
         _dataReceivedCallback = callback;
     }
 

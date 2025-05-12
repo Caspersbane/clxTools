@@ -5,9 +5,9 @@ function MidiPitch() {
     ];
 
     /**
-     * 将音符名称转换为对应的 MIDI 音高值。
-     * @param {string} name - 要转换的音符名称，例如 C4、C4#、C#、C 等。
-     * @returns {number} 音符的 MIDI 音高值。
+     * Converts note names to corresponding MIDI pitch values.
+     * @param {string} name - The name of the note to be converted, for example C4、C4#、C#、C 等。
+     * @returns {number} The MIDI pitch value of the note.
      */
     this.nameToMidiPitch = function (name) {
         name = name.toUpperCase();
@@ -37,9 +37,9 @@ function MidiPitch() {
         }
     }
     /**
-     * 将 MIDI 音高值转换为对应的音符名称。
-     * @param {number} midiPitch - 要转换的 MIDI 音高值。
-     * @returns {string} 音符名称，例如 C4、C#4 等。
+     * Converts MIDI pitch values to corresponding note names.
+     * @param {number} midiPitch - The MIDI pitch value to be converted.
+     * @returns {string} Note names, such as C4, C#4, etc.
      */
     this.midiPitchToName = function (midiPitch) {
         const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -50,24 +50,24 @@ function MidiPitch() {
 
 
     /**
-     * 返回MIDI音高值是否是半音 (实际上, 黑键?)
-     * @param {number} pitch - MIDI音高值。
-     * @returns {boolean} 如果是半音则返回true，否则返回false。
+     * Returns whether the MIDI pitch value is a semitone (actually, the black key?)
+     * @param {number} pitch - MIDI pitch value.
+     * @returns {boolean} Returns true if it is a semitone, false otherwise.
      */
     this.isHalf = function (pitch) {
         return pitch % 12 === 1 || pitch % 12 === 3 || pitch % 12 === 6 || pitch % 12 === 8 || pitch % 12 === 10;
     }
 
     /**
-     * 移调: 获取移调值对应的调号(0 -> 'C')
-     * @param {number} offset - 移调值。
-     * @returns {string} 移调值对应的调号。
+     * Transpose: Get the key signature corresponding to the transpose value (0 -> 'C')
+     * @param {number} offset - Transpose the value.
+     * @returns {string} The key signature corresponding to the transpose value.
      */
     this.getTranspositionEstimatedKey = function (offset) {
         const transpositionName = [
             'Ab', 'A', 'Bb', 'B', 'C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G'
         ];
-        return transpositionName[(-offset + 4 + 12) % 12]; //反向...
+        return transpositionName[(-offset + 4 + 12) % 12]; //reverse...
     };
 }
 

@@ -6,9 +6,9 @@ const ToneJsJSONParser = require('../frontend/ToneJsJSON');
 function MusicReader() {
     let musicFormats = new MusicFormats();
     /**
-     * @brief 解析文件
-     * @param {string} filePath 文件路径
-     * @param {string?} forcedFormatName 强制指定格式
+     * @brief Parse the file
+     * @param {string} filePath File path
+     * @param {string?} forcedFormatName Enforce the format
      * @returns {import("../musicFormats").TracksData}
      */
     this.parseFile = function (filePath, forcedFormatName) {
@@ -28,11 +28,11 @@ function MusicReader() {
                 const midi = new Midi(fs.readFileSync(filePath));
                 return new ToneJsJSONParser().parseFromJSON(midi.toJSON());
             default:
-                throw new Error("不支持的文件格式");
+                throw new Error("Unsupported file formats");
         }
     }
 }
 
-module.exports= {
+module.exports = {
     MusicReader
 }

@@ -6,11 +6,11 @@ function FileChooser() {
     const FileChooserPathEvent = "FileChooserPathEvent";
 
     /**
-     * @brief 调用系统文件选择器选择文件
-     * @param {function<string>} callback 回调函数, 参数为选择的文件路径, 选择取消时为null
+     * @brief Invoke the system file picker to select the file
+     * @param {function<string>} callback The callback function is set to the selected file path, and null when canceled
      */
     this.chooseFile = function (callback) {
-        throw "Not implemented"; // TODO: 未实现
+        throw "Not implemented"; // TODO: Not implemented
         let exec = engines.execScriptFile("src/fileChooserActivity.js");
         let engine = exec.getEngine();
         events.broadcast.on(FileChooserPathEvent, (path) => {
@@ -22,12 +22,12 @@ function FileChooser() {
     }
 
     /**
-     * @brief 调用系统文件选择器选择文件(阻塞的)
-     * @return {string} 选择的文件路径, 选择取消时为null
+     * @brief Invoking the System File Selector to Select a File (Blocking)
+     * @return {string} The selected file path is null when canceled
      */
-    this.chooseFileSync = function() {
+    this.chooseFileSync = function () {
         let result = 0;
-        this.chooseFile(function(path) {
+        this.chooseFile(function (path) {
             result = path;
         });
         while (result === 0) {
@@ -37,18 +37,18 @@ function FileChooser() {
     }
 
     /**
-     * @brief 调用系统文件选择器选择文件并复制到指定目录
-     * @param {string} destDir 目标目录
+     * @brief Call the system file selector to select the file and copy it to the specified directory
+     * @param {string} destDir Destination directory
      */
-    this.chooseFileAndCopyTo = function(destDir) {
-        if(!destDir.endsWith("/")) {
+    this.chooseFileAndCopyTo = function (destDir) {
+        if (!destDir.endsWith("/")) {
             destDir += "/";
         }
         let exec = engines.execScriptFile("src/fileChooserActivity.js", {
             arguments: ["copyTo", destDir]
         });
     }
-    
+
 }
 
 module.exports = FileChooser;

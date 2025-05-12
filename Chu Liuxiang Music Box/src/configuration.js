@@ -1,33 +1,33 @@
-// Description: 配置系统
+// Description: Configure the system
 
 let MusicFormats = require("./musicFormats");
 
 function Configuration() {
     const globalConfig = storages.create("hallo1_clxmidiplayer_config");
-    const musicDir = "/sdcard/楚留香音乐盒数据目录/";
+    const musicDir = "/sdcard/Chu Liuxiang music box data directory/";
     const configSubDir = "configs/";
     const musicFormats = new MusicFormats();
-    
+
     /**
-     * 尝试迁移旧的配置文件到新的配置文件
-     * @param {string} rawFilename - 不带后缀名的文件名
+     * Try migrating the old profile to the new one
+     * @param {string} rawFilename - The file name without the suffix
      */
     function tryMigrateOldConfig(rawFilename) {
         files.ensureDir(musicDir + configSubDir);
         const oldConfigPath = musicDir + rawFilename + ".json.cfg";
         const newConfigPath = musicDir + configSubDir + rawFilename + ".json";
         if (files.exists(oldConfigPath) && !files.exists(newConfigPath)) {
-            console.info("迁移旧配置文件:" + oldConfigPath + " -> " + newConfigPath);
+            console.info("Migrate old profiles:" + oldConfigPath + " -> " + newConfigPath);
             files.move(oldConfigPath, newConfigPath);
         }
     }
 
     /**
-     * 初始化指定文件的配置
-     * @param {string} filepath - 配置文件的路径
+     * Initialize the configuration of the specified file
+     * @param {string} filepath - The path to the configuration file
      */
     function initFileConfig(filepath) {
-        console.info("初始化文件:" + filepath);
+        console.info("Initialize the file:" + filepath);
         files.create(filepath);
         let cfg = {};
         cfg.semiToneRoundingMode = 0;
@@ -35,30 +35,30 @@ function Configuration() {
     };
 
     /**
-     * 获取音乐文件夹的路径
-     * @returns {string} - 返回音乐文件夹的路径
+     * Get the path to the music folder
+     * @returns {string} - Returns the path to the music folder
      */
     this.getMusicDir = function () {
         return musicDir;
     }
 
     /**
-     * 设置全局配置项
-     * @param {string} key - 配置项的键名
-     * @param {*} val - 配置项的值
-     * @returns {number} - 返回0表示设置成功(总是成功?)
+     * Set global configuration items
+     * @param {string} key - The key name of the configuration item
+     * @param {*} val - The value of the configuration item
+     * @returns {number} - Returning 0 indicates that the setting is successful (always successful?)
      */
     this.setGlobalConfig = function (key, val) {
         globalConfig.put(key, val);
-        console.log("设置全局配置成功: " + key + " = " + val);
+        console.log("The global configuration is successful: " + key + " = " + val);
         return 0;
     };
 
     /**
-     * 读取全局配置项
-     * @param {string} key - 配置项的键名
-     * @param {*} defaultValue - 配置项的默认值
-     * @returns {*} - 返回配置项的值，如果不存在则返回默认值
+     * Read the global configuration item
+     * @param {string} key - The key name of the configuration item
+     * @param {*} defaultValue - The default value of the configuration item
+     * @returns {*} - Returns the value of the CI item, or the default value if it does not exist
      */
     this.readGlobalConfig = function (key, defaultValue) {
         let res = globalConfig.get(key, defaultValue);
@@ -70,9 +70,9 @@ function Configuration() {
     };
 
     /**
-     * 判断指定文件是否存在对应的配置文件
-     * @param {*} filename - 文件名
-     * @returns {boolean} - 返回true表示存在对应的配置文件，否则返回false
+     * Check whether the specified file has a configuration file
+     * @param {*} filename - filename
+     * @returns {boolean} - Returns true indicates that the corresponding configuration file exists, otherwise it returns false
      */
     this.haveFileConfig = function (filename) {
         filename = musicFormats.getFileNameWithoutExtension(filename);
@@ -85,14 +85,14 @@ function Configuration() {
     }
 
     /**
-     * 设置指定文件的配置项
-     * @param {string} key - 配置项的键名
-     * @param {*} val - 配置项的值
-     * @param {string} filename - 文件名
-     * @returns {number} - 返回0表示设置成功
+     * Set the configuration items of the specified file
+     * @param {string} key - The key name of the configuration item
+     * @param {*} val - The value of the configuration item
+     * @param {string} filename - filename
+     * @returns {number} - If the return is 0, the setting is successful
      */
     this.setFileConfig = function (key, val, filename) {
-        console.verbose("设置文件配置: " + key + " = " + val + " for " + filename);
+        console.verbose("Set the file configuration: " + key + " = " + val + " for " + filename);
         filename = musicFormats.getFileNameWithoutExtension(filename);
         const configPath = musicDir + configSubDir + filename + ".json";
         if (!this.haveFileConfig(filename)) {
@@ -103,16 +103,16 @@ function Configuration() {
 
         tmp[key] = val;
         files.write(configPath, JSON.stringify(tmp));
-        console.verbose("写入文件" + configPath + "成功");
+        console.verbose("Write to the file" + configPath + "succeed");
         return 0;
     };
 
     /**
-     * 读取指定文件的配置项
-     * @param {string} key - 配置项的键名
-     * @param {string} filename - 文件名
-     * @param {*} [defaultValue] - 配置项的默认值
-     * @returns {*} - 返回配置项的值，如果不存在则返回默认值
+     * Read the configuration items of the specified file
+     * @param {string} key - The key name of the configuration item
+     * @param {string} filename - filename
+     * @param {*} [defaultValue] - The default value of the configuration item
+     * @returns {*} - Returns the value of the CI item, or the default value if it does not exist
      */
     this.readFileConfig = function (key, filename, defaultValue) {
         filename = musicFormats.getFileNameWithoutExtension(filename);
@@ -123,7 +123,7 @@ function Configuration() {
         let tmp = files.read(configPath);
         tmp = JSON.parse(tmp);
 
-        //迁移: halfCeiling -> semiToneRoundingMode
+        //migrate: halfCeiling -> semiToneRoundingMode
         if (key == "semiToneRoundingMode") {
             if (tmp["halfCeiling"] != null) {
                 this.setFileConfig(
@@ -136,21 +136,21 @@ function Configuration() {
         }
 
         if (tmp[key] == null) {
-            console.verbose(`返回默认值:${key} = ${JSON.stringify(defaultValue)}`);
+            console.verbose(`Returns to the default value:${key} = ${JSON.stringify(defaultValue)}`);
             return defaultValue;
         } else {
-            console.verbose(`读取配置:${key} = ${JSON.stringify(tmp[key])}`);
+            console.verbose(`Read the configuration:${key} = ${JSON.stringify(tmp[key])}`);
             return tmp[key];
         }
     };
 
     /**
-     * 设置指定文件在指定目标(游戏-键位-乐器)的配置项
-     * @param {string} key - 配置项的键名
-     * @param {*} val - 配置项的值
-     * @param {string} filename - 文件名
-     * @param {import("./gameProfile")} gameProfile - 游戏配置
-     * @returns {number} - 返回0表示设置成功
+     * Set the configuration items of the specified file in the specified target (Game-Key-Instrument).
+     * @param {string} key - The key name of the configuration item
+     * @param {*} val - The value of the configuration item
+     * @param {string} filename - filename
+     * @param {import("./gameProfile")} gameProfile - Game configuration
+     * @returns {number} - If the return is 0, the setting is successful
      */
     this.setFileConfigForTarget = function (key, val, filename, gameProfile) {
         const newKey = `${gameProfile.getProfileIdentifierTriple()}.${key}`;
@@ -158,12 +158,12 @@ function Configuration() {
     }
 
     /**
-     * 读取指定文件在指定目标(游戏-键位-乐器)的配置项, 如果不存在则返回公共配置, 如果公共配置也不存在则返回默认值
-     * @param {string} key - 配置项的键名
-     * @param {string} filename - 文件名
-     * @param {import("./gameProfile")} gameProfile - 游戏配置
-     * @param {*} [defaultValue] - 配置项的默认值
-     * @returns {*} - 返回配置项的值，如果不存在则返回默认值
+     * Read the configuration items of the specified file in the specified target (game-key-instrument), return the public configuration if it does not exist, and return the default value if the public configuration does not exist
+     * @param {string} key - The key name of the configuration item
+     * @param {string} filename - filename
+     * @param {import("./gameProfile")} gameProfile - Game configuration
+     * @param {*} [defaultValue] - The default value of the configuration item
+     * @returns {*} - Returns the value of the CI item, or the default value if it does not exist
      */
     this.readFileConfigForTarget = function (key, filename, gameProfile, defaultValue) {
         const newKey = `${gameProfile.getProfileIdentifierTriple()}.${key}`;
@@ -179,9 +179,9 @@ function Configuration() {
     }
 
     /**
-     * 清除指定文件的配置
-     * @param {string} filename - 文件名
-     * @returns {number} - 返回0表示清除成功
+     * Clear the configuration of the specified file
+     * @param {string} filename - filename
+     * @returns {number} - If 0 is returned, the clearance is successful
      */
     this.clearFileConfig = function (filename) {
         filename = musicFormats.getFileNameWithoutExtension(filename);
@@ -191,9 +191,9 @@ function Configuration() {
     }
 
     /**
-     * 保存json对象到配置文件夹下指定文件
-     * @param {string} filename - 文件名
-     * @param {object} obj - json对象
+     * Save the JSON object to the specified file in the configuration folder
+     * @param {string} filename - filename
+     * @param {object} obj - JSON object
      */
     this.setJsonToFile = function (filename, obj) {
         const configPath = musicDir + configSubDir + filename + ".json";
@@ -202,9 +202,9 @@ function Configuration() {
     }
 
     /**
-     * 从配置文件夹下指定文件读取json对象
-     * @param {string} filename - 文件名, 不带.json后缀
-     * @returns {object?} - json对象, 如果文件不存在则返回null
+     * Read the JSON object from the specified file in the configuration folder
+     * @param {string} filename - File name, without .json suffix
+     * @returns {object?} - JSON object, which returns null if the file does not exist
      */
     this.getJsonFromFile = function (filename) {
         const configPath = musicDir + configSubDir + filename + ".json";
@@ -214,15 +214,15 @@ function Configuration() {
         try {
             return JSON.parse(files.read(configPath));
         } catch (e) {
-            console.error(`读取配置文件${configPath}失败: ${e}`);
+            console.error(`Read the configuration file${configPath}fail: ${e}`);
             return null;
         }
     }
 
     /**
-     * 获取配置文件夹下指定文件的上次修改时间
-     * @param {string} filename - 文件名, 不带.json后缀
-     * @returns {number?} - 返回上次修改时间(毫秒), 如果文件不存在则返回null
+     * Obtain the last modified time of the specified file in the configuration folder
+     * @param {string} filename - File name, without .json suffix
+     * @returns {number?} - Returns the last modified time (in milliseconds), or null if the file does not exist
      */
     this.getJsonFileLastModifiedTime = function (filename) {
         const configPath = musicDir + configSubDir + filename + ".json";

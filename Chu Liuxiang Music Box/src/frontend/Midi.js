@@ -1,9 +1,9 @@
 
 function MidiParser() {
     /**
-     * @brief 解析一个文件
-     * @param {string} filePath 文件路径
-     * @returns {import("../musicFormats").TracksData} 音乐数据
+     * @brief Parse a file
+     * @param {string} filePath File path
+     * @returns {import("../musicFormats").TracksData} Music data
      */
     this.parseFile = function (filePath) {
         // https://github.com/bhaeussermann/MidiReader
@@ -23,7 +23,7 @@ function MidiParser() {
             "name": "",
             "channel": 0,
             "trackIndex": 0,
-            "instrumentId": -1, 
+            "instrumentId": -1,
             "noteCount": 0,
             "notes": new Array()
         });
@@ -40,7 +40,7 @@ function MidiParser() {
                     "name": trackInfo.getTrackName(),
                     "channel": channel.getChannelNumber(),
                     "trackIndex": channel.getTrackNumber(),
-                    "instrumentId": -1, //稍后再设置
+                    "instrumentId": -1, //Set it up later
                     "noteCount": 0,
                     "notes": new Array()
                 });
@@ -62,9 +62,9 @@ function MidiParser() {
                     continue;
                 }
                 tracks[trackIndex].push(event);
-            } else if (event instanceof StateChangeMidiEvent) {  
+            } else if (event instanceof StateChangeMidiEvent) {
                 switch (event.getStateChangeType()) {
-                    case StateChangeMidiEvent.StateChangeType.PROGRAM_CHANGE: { //FIXME: 这些事件似乎会被不正确地吞掉, 导致乐器为-1
+                    case StateChangeMidiEvent.StateChangeType.PROGRAM_CHANGE: { //FIXME: These events appear to be swallowed incorrectly, resulting in -1 for the instrument
                         let channelNumber = event.getChannelNumber();
                         for (let trackData of tracksData) {
                             if (trackData.channel === channelNumber) {
@@ -113,7 +113,7 @@ function MidiParser() {
                 });
                 if (noteOffIndex == -1) {
                     console.log("Warn: NOTE_ON without NOTE_OFF at track " + i + " evt " + noteOn.toString());
-                    continue; //这样处理会不会有问题?
+                    continue; //There will be no problems with this treatment?
                 }
                 let noteOff = noteOffs.splice(noteOffIndex, 1)[0];
                 let key = noteOn.getNoteNumber();
@@ -127,10 +127,10 @@ function MidiParser() {
             }
         }
         // console.log("MidiParser.parseFile: " + JSON.stringify(tracksData));
-        console.verbose("音轨:");
+        console.verbose("Track:");
         for (let i = 0; i < tracksData.length; i++) {
             let trackData = tracksData[i];
-            console.verbose("音轨%s, 通道%s, 乐器%s, 音符数%s", trackData.trackIndex, trackData.channel, trackData.instrumentId, trackData.noteCount);
+            console.verbose("Track%s, passage%s, musical instrument%s, Number of notes%s", trackData.trackIndex, trackData.channel, trackData.instrumentId, trackData.noteCount);
         }
         return {
             "haveMultipleTrack": true,

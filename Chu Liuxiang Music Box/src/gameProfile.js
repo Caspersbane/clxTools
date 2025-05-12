@@ -7,16 +7,16 @@ var midiPitch = require("./midiPitch.js");
  */
 
 /**
- * 按键定位类型/需要获取坐标的按键类型
+ * Key positioning type/type of key that needs to get coordinates
  * @enum {string}
  * @typedef {string} KeyLocatorType
  */
 const KeyLocatorTypes = {
-    //左上角
+    //Top left
     "LOCATOR_LEFT_TOP": "LOCATOR_LEFT_TOP",
-    //右下角
+    //Bottom right
     "LOCATOR_RIGHT_BOTTOM": "LOCATOR_RIGHT_BOTTOM",
-    //按下长音
+    //Press the long tone
     "KEY_LONG": "KEY_LONG",
 }
 
@@ -25,11 +25,11 @@ const KeyLocatorTypes = {
  * @typedef {string} NoteDurationImplementionType
  */
 const NoteDurationImplementionTypes = {
-    //根本不支持，所有音符都是一样长, 不管按住多久 //最简单
+    //Not at all, all notes are the same length, no matter how long you hold it down // the easiest
     "none": "none",
-    //通过同时按住另外一个键来发出长音, 两种情况差别很大 //TODO:
+    //By holding down another key at the same time to make a long sound, there is a big difference between the two cases //TODO:
     "extraLongKey": "extraLongKey",
-    //原生支持, 按住多久就发出多长的音 //最难支持 //TODO:
+    //Native support, how long to make a sound when you hold it down //hardest to support //TODO:
     "native": "native",
 }
 
@@ -37,124 +37,124 @@ const NoteDurationImplementionTypes = {
  * @enum {string}
  */
 const FeatureFlags = {
-    //是否有全部半音
+    //Whether there are all semitones
     "hasAllSemitone": "hasAllSemitone",
 }
 
 /**
  * @typedef {object} LayoutGeneratorConfig
- * @property {Array<string>} pitchRangeOrList 音高范围或音高列表, 例如["C3", "C5"](包含C5)/["C3", "D3", ...]
- * @property {number} row 行数
- * @property {number} column 列数(包括黑键)
- * @property {Array<[number,number]>} [rowLengthOverride] 覆盖某一行的长度, 默认为空, 使用column (从下往上数)
- * @property {Array<[number,number]>} [insertDummyKeys] 在指定位置插入虚拟按键, 用于调整布局. 从下往上数, 从左往右数, 如[0,1]表示在第一行第2个位置插入一个虚拟按键
- * @property {boolean} haveSemitone 是否有半音
- * @property {number} [semiToneWidth] 半音按键占据的宽度, 为0时则位于两个全音按键之间, 为1时则独立占据一个按键位置, 介于0和1之间时则按比例占据一部分, 默认为0
- * @property {number} [semiToneHeightOffset] 半音按键的高度偏移, 为0时则位于全音按键的中间, 为1时则位于上面那列按键的中间, 介于0和1之间时则按比例调整相对位置, 默认为0.5
+ * @property {Array<string>} pitchRangeOrList Pitch range or pitch list, e.g. ["C3", "C5"] (including C5)/["C3", "D3", ...]
+ * @property {number} row Number of rows
+ * @property {number} column Number of columns (including black keys)
+ * @property {Array<[number,number]>} [rowLengthOverride] Overwrite the length of a row, default is empty, use column (count from bottom to top)
+ * @property {Array<[number,number]>} [insertDummyKeys] Insert a virtual button at the specified position for adjusting the layout. Count from bottom to top, count from left to right, e.g. [0,1] means inserting a virtual button in the second position of the first row
+ * @property {boolean} haveSemitone Whether there are semitones or not
+ * @property {number} [semiToneWidth] The width occupied by the chromatic key is between the two whole tone keys when it is 0, a key position is independent when it is 1, and a proportional part of it is between 0 and 1, which is 0 by default
+ * @property {number} [semiToneHeightOffset] The height of the chromatic keys is offset by 0 in the middle of the whole tone keys, 1 in the middle of the above column, and between 0 and 1 in proportion to the relative position, which is 0.5 by default
  * @property {[[number, number, number],
 *             [number, number, number],
-*             [number, number, number]]} [transformMatrix] 变换矩阵, 用于对按键位置进行变换. 默认为 I-> 不变换
-* @property {number} [centerAngle] 弧形按键对应扇形的中心角度, 默认为0 -> 不变换
-* @property {number} [centerRadius] 弧形按键对应扇形的中心半径(设按键布局总高度为1)
+*             [number, number, number]]} [transformMatrix] Transform matrix, which is used to transform the position of the keys. The default is I-> does not transform
+* @property {number} [centerAngle] The arc button corresponds to the center angle of the sector, and the default value is 0 -> does not transform
+* @property {number} [centerRadius] The center radius of the curved button corresponds to the sector (set the total height of the button layout to 1)
 */
 
 /**
-* @brief 根据参数生成音高到按键的映射
+* @brief Generate pitch-to-key mappings based on parameters
 * @param {LayoutGeneratorConfig} config 
-* @returns {Map<string, pos2dPair|undefined>} 音高到按键位置的映射
+* @returns {Map<string, pos2dPair|undefined>} Pitch-to-key position mapping
 */
 function generateLayout(config) {
-   if(config.semiToneWidth == undefined){
-       config.semiToneWidth = 0;
-   }
-   if(config.semiToneHeightOffset == undefined){
-       config.semiToneHeightOffset = 0.5;
-   }
-   if(config.transformMatrix == undefined){
-       config.transformMatrix = [
-           [1, 0, 0],
-           [0, 1, 0],
-           [0, 0, 1],
-       ];
-   }
-   if(config.centerAngle == undefined){
-       config.centerAngle = 0;
-   }
-   if(config.centerRadius == undefined){
-       config.centerRadius = 1;
-   }
-   let rowLengthOverride = new Map();
-   if(config.rowLengthOverride){
-       for(let i = 0; i < config.rowLengthOverride.length; i++){
-           rowLengthOverride[config.rowLengthOverride[i][0]] = config.rowLengthOverride[i][1];
-       }
-   }
-   console.log(rowLengthOverride);
+    if (config.semiToneWidth == undefined) {
+        config.semiToneWidth = 0;
+    }
+    if (config.semiToneHeightOffset == undefined) {
+        config.semiToneHeightOffset = 0.5;
+    }
+    if (config.transformMatrix == undefined) {
+        config.transformMatrix = [
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1],
+        ];
+    }
+    if (config.centerAngle == undefined) {
+        config.centerAngle = 0;
+    }
+    if (config.centerRadius == undefined) {
+        config.centerRadius = 1;
+    }
+    let rowLengthOverride = new Map();
+    if (config.rowLengthOverride) {
+        for (let i = 0; i < config.rowLengthOverride.length; i++) {
+            rowLengthOverride[config.rowLengthOverride[i][0]] = config.rowLengthOverride[i][1];
+        }
+    }
+    console.log(rowLengthOverride);
 
-   let rows = [];
-   //1. 生成每一行的音高列表, 暂时不管按键位置
-   let usePitchRange = config.pitchRangeOrList.length == 2;
-   let pitchOrIndex = usePitchRange ? midiPitch.nameToMidiPitch(config.pitchRangeOrList[0]) : 0;
-   for (let i = 0; i < config.row; i++) {
-       let colLen = rowLengthOverride.get(i) ? rowLengthOverride.get(i) : config.column;
-       console.log(colLen);
-       let row = [];
-       for (let j = 0; j < colLen; j++) {
-           let curPitch = usePitchRange ? pitchOrIndex : midiPitch.nameToMidiPitch(config.pitchRangeOrList[pitchOrIndex]);
-           row.push([curPitch, [0,0]]);
-           if(usePitchRange){
-               //如果下一个音符是半音但不使用半音键, 则跳过
-               if(!config.haveSemitone && midiPitch.isHalf(curPitch + 1)){
-                   pitchOrIndex++;
-               }
-               pitchOrIndex++;
-           }else{
-               pitchOrIndex++;
-           }
-       }
-       rows.push(row);
-   }
+    let rows = [];
+    //1. Generate a list of pitches for each row, regardless of key position for the time being
+    let usePitchRange = config.pitchRangeOrList.length == 2;
+    let pitchOrIndex = usePitchRange ? midiPitch.nameToMidiPitch(config.pitchRangeOrList[0]) : 0;
+    for (let i = 0; i < config.row; i++) {
+        let colLen = rowLengthOverride.get(i) ? rowLengthOverride.get(i) : config.column;
+        console.log(colLen);
+        let row = [];
+        for (let j = 0; j < colLen; j++) {
+            let curPitch = usePitchRange ? pitchOrIndex : midiPitch.nameToMidiPitch(config.pitchRangeOrList[pitchOrIndex]);
+            row.push([curPitch, [0, 0]]);
+            if (usePitchRange) {
+                //If the next note is a semitone but no chromatic keys are used, skip
+                if (!config.haveSemitone && midiPitch.isHalf(curPitch + 1)) {
+                    pitchOrIndex++;
+                }
+                pitchOrIndex++;
+            } else {
+                pitchOrIndex++;
+            }
+        }
+        rows.push(row);
+    }
 
-   //2. 插入虚拟列
-   if(config.insertDummyKeys){
-       //从右往左插入
-       for(let i = 0; i < rows.length; i++){
-           let insertDummyColumns = config.insertDummyKeys.reduce((acc, cur) => {
-               if(cur[0] == i){
-                   //@ts-ignore
-                   acc.push(cur[1]);
-               }
-               return acc;
-           }, []).sort((a, b) => b - a);
-           for(let j = 0; j < insertDummyColumns.length; j++){
-               rows[i].splice(insertDummyColumns[j], 0, [-1, [0,0]]);
-           }
-       }
-   }
+    //2. Insert a dummy column
+    if (config.insertDummyKeys) {
+        //Insert from right to left
+        for (let i = 0; i < rows.length; i++) {
+            let insertDummyColumns = config.insertDummyKeys.reduce((acc, cur) => {
+                if (cur[0] == i) {
+                    //@ts-ignore
+                    acc.push(cur[1]);
+                }
+                return acc;
+            }, []).sort((a, b) => b - a);
+            for (let j = 0; j < insertDummyColumns.length; j++) {
+                rows[i].splice(insertDummyColumns[j], 0, [-1, [0, 0]]);
+            }
+        }
+    }
 
-   //3. 生成基础的坐标
-   //假设每一行最左为x=0, 最右为1 / 每一列最下为y=1, 最上为0
-   
-   let rowDistance = config.row == 1 ? 1 : 1 / (config.row - 1);
-   let colDistance = config.column == 1 ? 1 : 1 / (config.column - 1);
+    //3. Generate the coordinates of the foundation
+    //Suppose each row is x=0 at the left, 1 at the right, y=1 at the bottom of each column, and 0 at the top
 
-   for(let i = 0; i < rows.length; i++){
-       let curX = 0
-       for(let j = 0; j < rows[i].length; j++){
-           //需要考虑config.semiToneWidth
-           rows[i][j][1][0] = curX;
-           //查看当前或者下一个音符是否是半音, 如果是则需要调整位置
-           //@ts-ignore
-           if(midiPitch.isHalf(rows[i][j][0]) || (rows[i][j + 1] && midiPitch.isHalf(rows[i][j + 1][0]))){
-               curX += colDistance * (1 + config.semiToneWidth);
-           }else{
-               curX += colDistance * 2;
-           }
-           rows[i][j][1][1] = 1 - rowDistance * i;
-       }
+    let rowDistance = config.row == 1 ? 1 : 1 / (config.row - 1);
+    let colDistance = config.column == 1 ? 1 : 1 / (config.column - 1);
 
-   }
-   //归一化X坐标
+    for (let i = 0; i < rows.length; i++) {
+        let curX = 0
+        for (let j = 0; j < rows[i].length; j++) {
+            //Config needs to be considered.semiToneWidth
+            rows[i][j][1][0] = curX;
+            //Check if the current or next note is a semitone, and if so, adjust the position
+            //@ts-ignore
+            if (midiPitch.isHalf(rows[i][j][0]) || (rows[i][j + 1] && midiPitch.isHalf(rows[i][j + 1][0]))) {
+                curX += colDistance * (1 + config.semiToneWidth);
+            } else {
+                curX += colDistance * 2;
+            }
+            rows[i][j][1][1] = 1 - rowDistance * i;
+        }
+
+    }
+    //Normalize the X coordinates
     {
         let minX = rows.reduce((min, row) => Math.min(min, row.reduce((min, key) => Math.min(min, key[1][0]), 0)), 0);
         let maxX = rows.reduce((max, row) => Math.max(max, row.reduce((max, key) => Math.max(max, key[1][0]), 0)), 0);
@@ -164,37 +164,37 @@ function generateLayout(config) {
                 rows[i][j][1][0] = (rows[i][j][1][0] - minX) / width;
             }
         }
-    }   
-   //4. 居中对齐
-   for(let i = 0; i < rows.length; i++){
-       let row = rows[i];
-       let rowLen = row[row.length - 1][1][0] - row[0][1][0];
-       let centerX = rowLen / 2;
-        for(let j = 0; j < row.length; j++){
+    }
+    //4. Center-aligned
+    for (let i = 0; i < rows.length; i++) {
+        let row = rows[i];
+        let rowLen = row[row.length - 1][1][0] - row[0][1][0];
+        let centerX = rowLen / 2;
+        for (let j = 0; j < row.length; j++) {
             row[j][1][0] -= (centerX - 0.5);
         }
-   }
+    }
 
-   //5. 调整半音按键的y坐标
-   for(let i = 0; i < rows.length; i++){
-       for(let j = 0; j < rows[i].length; j++){
-           //@ts-ignore
-           if(midiPitch.isHalf(rows[i][j][0])){
-               rows[i][j][1][1] -= rowDistance * config.semiToneHeightOffset;
-           }
-       }
-   }
+    //5. Adjust the y coordinate of the chromatic button
+    for (let i = 0; i < rows.length; i++) {
+        for (let j = 0; j < rows[i].length; j++) {
+            //@ts-ignore
+            if (midiPitch.isHalf(rows[i][j][0])) {
+                rows[i][j][1][1] -= rowDistance * config.semiToneHeightOffset;
+            }
+        }
+    }
 
-   //6. 应用变换矩阵
-   for(let i = 0; i < rows.length; i++){
-       for(let j = 0; j < rows[i].length; j++){
-           let pos = rows[i][j][1];
-           pos[0] = pos[0] * config.transformMatrix[0][0] + pos[1] * config.transformMatrix[0][1] + config.transformMatrix[0][2];
-           pos[1] = pos[0] * config.transformMatrix[1][0] + pos[1] * config.transformMatrix[1][1] + config.transformMatrix[1][2];
-       }
-   }
+    //6. Apply a transformation matrix
+    for (let i = 0; i < rows.length; i++) {
+        for (let j = 0; j < rows[i].length; j++) {
+            let pos = rows[i][j][1];
+            pos[0] = pos[0] * config.transformMatrix[0][0] + pos[1] * config.transformMatrix[0][1] + config.transformMatrix[0][2];
+            pos[1] = pos[0] * config.transformMatrix[1][0] + pos[1] * config.transformMatrix[1][1] + config.transformMatrix[1][2];
+        }
+    }
 
-    //7. 应用弧形变换
+    //7. Apply an arc transform
     if (config.centerAngle != 0) {
         let centerX = 0.5;
         let centerY = -config.centerRadius;
@@ -209,10 +209,10 @@ function generateLayout(config) {
                 let newX = centerX + (radius + pos[1]) * Math.cos(angle);
                 let newY = centerY + (radius + pos[1]) * Math.sin(angle);
                 pos[0] = newX;
-                pos[1] = newY; // 修正y坐标
+                pos[1] = newY; // Fix the y coordinates
             }
         }
-        // 归一化x和y到0,1之间
+        // Normalize x and y to between 0,1
         let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
         for (let i = 0; i < rows.length; i++) {
             for (let j = 0; j < rows[i].length; j++) {
@@ -230,66 +230,66 @@ function generateLayout(config) {
                 pos[1] = (pos[1] - minY) / (maxY - minY);
             }
         }
-        //左右反转. 不知道为什么需要
-        for(let i = 0; i < rows.length; i++){
+        //Reverse left and right. Not sure why it is needed
+        for (let i = 0; i < rows.length; i++) {
             let poss = rows[i].map(key => key[1]);
             poss.reverse();
-            for(let j = 0; j < poss.length; j++){
+            for (let j = 0; j < poss.length; j++) {
                 rows[i][j][1] = poss[j];
             }
         }
     }
 
-   //8. 完全归一化
-   let minX = rows.reduce((min, row) => Math.min(min, row.reduce((min, key) => Math.min(min, key[1][0]), 0)), 0);
-   let maxX = rows.reduce((max, row) => Math.max(max, row.reduce((max, key) => Math.max(max, key[1][0]), 0)), 0);
-   let width = maxX - minX;
-   for(let i = 0; i < rows.length; i++){
-       for(let j = 0; j < rows[i].length; j++){
-           rows[i][j][1][0] = (rows[i][j][1][0] - minX) / width;
-       }
-   }
-   let minY = rows.reduce((min, row) => Math.min(min, row.reduce((min, key) => Math.min(min, key[1][1]), 0)), 0);
-   let maxY = rows.reduce((max, row) => Math.max(max, row.reduce((max, key) => Math.max(max, key[1][1]), 0)), 0);
-   let height = maxY - minY;
-   for(let i = 0; i < rows.length; i++){
-       for(let j = 0; j < rows[i].length; j++){
-           rows[i][j][1][1] = (rows[i][j][1][1] - minY) / height;
-       }
-   }
+    //8. Full normalization
+    let minX = rows.reduce((min, row) => Math.min(min, row.reduce((min, key) => Math.min(min, key[1][0]), 0)), 0);
+    let maxX = rows.reduce((max, row) => Math.max(max, row.reduce((max, key) => Math.max(max, key[1][0]), 0)), 0);
+    let width = maxX - minX;
+    for (let i = 0; i < rows.length; i++) {
+        for (let j = 0; j < rows[i].length; j++) {
+            rows[i][j][1][0] = (rows[i][j][1][0] - minX) / width;
+        }
+    }
+    let minY = rows.reduce((min, row) => Math.min(min, row.reduce((min, key) => Math.min(min, key[1][1]), 0)), 0);
+    let maxY = rows.reduce((max, row) => Math.max(max, row.reduce((max, key) => Math.max(max, key[1][1]), 0)), 0);
+    let height = maxY - minY;
+    for (let i = 0; i < rows.length; i++) {
+        for (let j = 0; j < rows[i].length; j++) {
+            rows[i][j][1][1] = (rows[i][j][1][1] - minY) / height;
+        }
+    }
 
-   //9. 生成最终结果
-   let noteKeyMap = new Map();
-   for(let i = 0; i < rows.length; i++){
-       for(let j = 0; j < rows[i].length; j++){
-           if(rows[i][j][0] != -1){
-               //@ts-ignore
-               let pitchName = midiPitch.midiPitchToName(rows[i][j][0]);
-               noteKeyMap[pitchName] = rows[i][j][1];
-           }
-       }
-   }
+    //9. Generate the final result
+    let noteKeyMap = new Map();
+    for (let i = 0; i < rows.length; i++) {
+        for (let j = 0; j < rows[i].length; j++) {
+            if (rows[i][j][0] != -1) {
+                //@ts-ignore
+                let pitchName = midiPitch.midiPitchToName(rows[i][j][0]);
+                noteKeyMap[pitchName] = rows[i][j][1];
+            }
+        }
+    }
 
-   //根据音高从低到高排序
-   return noteKeyMap;
+    //Sort according to pitch from low to high
+    return noteKeyMap;
 }
 
 /**
- * 常用的变换矩阵
+ * Commonly used transformation matrices
  * @type {Object.<string, [[number, number, number],
  *             [number, number, number],
  *             [number, number, number]]>}
  */
 const transformMatrices = {
-   "centerFlipY": [
-       [1, 0, 0],
-       [0, -1, 1],
-       [0, 0, 1],
-   ]
+    "centerFlipY": [
+        [1, 0, 0],
+        [0, -1, 1],
+        [0, 0, 1],
+    ]
 }
 
 /**
- * 常用的键位布局
+ * Commonly used key layouts
  * @constant
  * @type {Object.<string, LayoutGeneratorConfig>}
  */
@@ -373,8 +373,8 @@ const keyLayoutConfigs = {
         row: 3,
         column: 7,
         haveSemitone: false,
-        insertDummyKeys: [[1,0]],
-    },    
+        insertDummyKeys: [[1, 0]],
+    },
     "dzpd_7_8": {
         pitchRangeOrList: ["C4", "C6"],
         row: 2,
@@ -395,7 +395,7 @@ const keyLayoutConfigs = {
         column: 7,
         haveSemitone: false,
         rowLengthOverride: [[2, 8]],
-        insertDummyKeys: [[0,7]],
+        insertDummyKeys: [[0, 7]],
     },
     "speedmobile_interleaved3x12_1": {
         pitchRangeOrList: ["C3", "C6"],
@@ -403,7 +403,7 @@ const keyLayoutConfigs = {
         column: 12,
         haveSemitone: true,
         semiToneHeightOffset: 0,
-        insertDummyKeys: [[0,12]],
+        insertDummyKeys: [[0, 12]],
     },
     "abd_7_8_7": {
         pitchRangeOrList: ["C3", "C6"],
@@ -487,7 +487,7 @@ const keyLayoutConfigs = {
         row: 3,
         column: 7,
         haveSemitone: false,
-        //坏的, 谁去修一下？
+        //Bad, who's going to fix it?
         centerAngle: Math.PI / 1.7,
         centerRadius: 1.55,
         // centerAngle: Math.PI / 4,
@@ -533,7 +533,7 @@ const keyLayoutConfigs = {
         row: 3,
         column: 7,
         haveSemitone: false,
-        insertDummyKeys: [[1,7]],
+        insertDummyKeys: [[1, 7]],
     },
     "qrsj_piano24": {
         pitchRangeOrList: ["C4", "B5"],
@@ -545,71 +545,71 @@ const keyLayoutConfigs = {
     },
 }
 
-//光遇: 乐曲调式对应的地图所在位置
+//Encounter: The location of the map corresponding to the tune
 //https://www.bilibili.com/read/cv15735140/
 const skyTuneMapPosition = {
-    "C": "遇境/晨岛沙漠地带/预言山谷中间/雨林第三个到第四个门之间（隐藏图入口）左侧有小金人的亭子/雨林四个金人的隐藏图的开头/雨林终点/霞光城/霞光城水底/禁阁地下室？/暴风眼第一阶段",
-    "Db": "晨岛终点旁的小岛/云野八人图/雨林第四道门到终点之间小金人的亭子（隐藏图出口）/禁阁三楼",
-    "D": "云野初始图后面/云野的中央大图（二图?）/云野右侧隐藏图（两个小破塔的那个）/圣岛/霞谷终点/霞谷迷宫/禁阁二楼/墓土三龙图/墓土终点/禁阁开头没到一楼的位置",
-    "Eb": "雨林第三道门到第四道门中间右侧的有小金人的亭子/墓土无龙图/墓土方舟/墓土四龙图/墓土沉船",
-    "E": "重生之路的星河",
-    "F": "云野三塔的终点大塔/雨林两个金人的隐藏图/霞谷飞行赛道的城堡（中间有个球的那个小破城）/办公室两个入口之间/禁阁一楼",
-    "Gb": "雨林第四道门到终点的最后一个塔",
-    "G": "雨林初始图/晨岛飞往终点的悬崖",
-    "Ab": "晨岛终点祭坛/预言山谷开头/霞谷赛道终点",
-    "A": "霞谷开头的溜冰三岔口/禁阁终点祭坛/禁阁四楼小破塔顶",
-    "Bb": "云野三塔图的二塔/雨林到霞谷的过渡图",
-    "B": "禁阁二楼第一次变调后",
+    "C": "Encounter/Morning Island Desert Zone/Middle of the Prophecy Valley/Between the third and fourth gates of the rainforest (hidden map entrance), there is a pavilion of the little golden man on the left side/The beginning of the hidden map of the four golden people in the rainforest/The end of the rainforest/Xiaguang City/Xiaguang City underwater/Forbidden Pavilion basement? / Eye of the Storm Phase I",
+    "Db": "The island next to the end of Morning Island / Yunye Eight People / The pavilion of the little golden figure between the fourth gate of the rainforest and the end point (hidden map exit) / The third floor of the Forbidden Pavilion",
+    "D": "Behind the initial diagram of the clouds/large central image of the clouds (second picture?) / Hidden map on the right side of Yunye (the one with two small broken towers) / Holy Island / End of Xiagu / Maze of Xiagu / Second Floor of the Forbidden Pavilion / Tomb Three Dragons / End of the Tomb / The beginning of the Forbidden Pavilion did not reach the position of the first floor",
+    "Eb": "On the right side of the middle of the third gate to the fourth gate of the rainforest, there is a pavilion of the little golden man/tomb soil without dragons/tomb earth ark/tomb soil four dragon maps/tomb earth shipwreck",
+    "E": "The galaxy of the road of rebirth",
+    "F": "The end of the three towers of Yunye, the big tower / The hidden map of the two golden men in the rainforest / The castle of the Kasumigaya Flying Track (the small broken city with a ball in the middle) / Between the two entrances of the office / The first floor of the Forbidden Pavilion",
+    "Gb": "The fourth gate of the rainforest to the last tower at the end",
+    "G": "Rainforest Initial Diagram / Morning Island Fly to the end cliffs",
+    "Ab": "Morning Island Finish Altar / Prophecy Valley Beginning / Kasumigaya Track Finish",
+    "A": "The skating three-way exit at the beginning of Kasumi Valley / the altar at the end of the Forbidden Pavilion / the top of the small broken tower on the fourth floor of the Forbidden Pavilion",
+    "Bb": "The second tower of the three towers of the cloud field/the transition map from the rainforest to the valley of Kasumigami",
+    "B": "After the first pitch change on the second floor of the Forbidden Pavilion",
 }
 
 /**
- * 变体类型的具体配置
- * 游戏中会有不同的乐器, 它们共享同样的键位, 但音域可能不同. 
- * 因此使用这个类型表示不同的变体
+ * The specific configuration of the variant type
+ * There will be different instruments in the game, which share the same keybits, but the vocal range may be different. 
+ * Therefore this type is used to denote different variants
  * @typedef {Object} VariantConfig
- * @property {string} variantType - 变体类型
- * @property {string} variantName - 变体名称
- * @property {[string, string]} [availableNoteRange] - 可用音符范围[最小值,最大值]。undefined表示使用noteKeyMap中的所有音符
- * @property {string} noteDurationImplementionType - 音符时长的实现方式。@see NoteDurationImplementionTypes。默认为"none"
- * @property {number} [sameKeyMinInterval] - 相同按键的最小间隔时间 (ms)。undefined表示使用GameConfig中的值, 否则使用这个值 | 0表示不限制
- * @property {Object.<string, string>} [replaceNoteMap] - 替换音符映射表。将原来音符替换为新的音符。例如: {"C3": "C4", "D3": "D4"}表示将C3替换为C4, D3替换为D4
+ * @property {string} variantType - Variant type
+ * @property {string} variantName - Variant name
+ * @property {[string, string]} [availableNoteRange] - Available note range [min, max]. undefined means that all notes in the noteKeyMap are used
+ * @property {string} noteDurationImplementionType - How note duration is implemented. @see NoteDurationImplementionTypes Defaults to "none"
+ * @property {number} [sameKeyMinInterval] - The minimum interval (ms) between the same keystrokes. undefined means that the value in the GameConfig is used, otherwise the value | 0 indicates no limit
+ * @property {Object.<string, string>} [replaceNoteMap] - Replace the note mapping table. Replace the original note with a new note. For example: {"C3": "C4", "D3": "D4"} means that C3 is replaced with C4 and D3 is replaced with D4
  */
 
 /**
- * 默认变体配置
+ * Default variant configuration
  * @type {VariantConfig}
  */
 const defaultVariantConfig = {
     variantType: "default",
-    variantName: "默认",
+    variantName: "default",
     noteDurationImplementionType: NoteDurationImplementionTypes.none,
 };
 
 /**
- * 键位类型
+ * Key type
  * @typedef {Object} KeyType
- * @property {string} name - 键位类型名称
- * @property {string} displayName - 键位类型显示名称
- * @property {LayoutGeneratorConfig} keyLayout - 键位布局生成配置
+ * @property {string} name - The name of the key type
+ * @property {string} displayName - The key type display name
+ * @property {LayoutGeneratorConfig} keyLayout - Key layout generation configuration
  */
 /**
  * @typedef {Object} GameConfig
- * @property {string} gameType - 游戏类型，可以为任意值
- * @property {string} gameName - 游戏名称，可以为任意值
- * @property {Array<KeyType>} keyTypes - 可用的键位类型
- * @property {Array<VariantConfig>} variants - 可用的变体。第一个变体为默认变体，如果只有一个变体，则不会显示变体选择界面
- * @property {number} sameKeyMinInterval - 相同按键的最小间隔时间 (ms)，默认为0
- * @property {Array<string>} packageNamePart - 包名的一部分，默认为空数组
+ * @property {string} gameType - The type of game, which can be any value
+ * @property {string} gameName - The name of the game, which can be any value
+ * @property {Array<KeyType>} keyTypes - Available key types
+ * @property {Array<VariantConfig>} variants - Available variants. The first variant is the default variant, and if there is only one variant, the variant selection screen will not be displayed
+ * @property {number} sameKeyMinInterval - The minimum interval (ms) for the same key, which defaults to 0
+ * @property {Array<string>} packageNamePart - Part of the package name, which defaults to an empty array
  */
 
 /**
- * 预定义的游戏配置
+ * Predefined game configurations
  * @type {Array<GameConfig>}
  */
 const PreDefinedGameConfigs = [
     {
-        gameType: "楚留香",
-        gameName: "楚留香",
+        gameType: "Chu Liuxiang",
+        gameName: "Chu Liuxiang",
         keyTypes: [{
             name: "generic_3x7",
             displayName: "3x7",
@@ -624,9 +624,9 @@ const PreDefinedGameConfigs = [
         ],
         sameKeyMinInterval: 200,
         packageNamePart: ["wyclx"],
-    },{
-        gameType: "天涯明月刀",
-        gameName: "天涯明月刀",
+    }, {
+        gameType: "The Moon Knife of the End of the World",
+        gameName: "The Moon Knife of the End of the World",
         keyTypes: [{
             name: "generic_3x7",
             displayName: "3x7",
@@ -637,9 +637,9 @@ const PreDefinedGameConfigs = [
         ],
         sameKeyMinInterval: 100,
         packageNamePart: ["tmgp.wuxia"],
-    },{
-        gameType: "原神",
-        gameName: "原神",
+    }, {
+        gameType: "Genshin Impact",
+        gameName: "Genshin Impact",
         keyTypes: [{
             name: "generic_3x7",
             displayName: "3x7",
@@ -651,18 +651,18 @@ const PreDefinedGameConfigs = [
         }],
         variants: [
             {
-                variantType: "风物之诗琴",
-                variantName: "风物之诗琴",
+                variantType: "The poetry of the scenery",
+                variantName: "The poetry of the scenery",
                 noteDurationImplementionType: NoteDurationImplementionTypes.none,
             },
             {
-                variantType: "晚风圆号",
-                variantName: "晚风圆号",
+                variantType: "Evening breeze horn",
+                variantName: "Evening breeze horn",
                 noteDurationImplementionType: NoteDurationImplementionTypes.native,
             },
             {
-                variantType: "老旧的诗琴",
-                variantName: "老旧的诗琴",
+                variantType: "The old poetry qin",
+                variantName: "The old poetry qin",
                 replaceNoteMap: {
                     "E3": "D3#",
                     "B3": "A3#",
@@ -678,9 +678,9 @@ const PreDefinedGameConfigs = [
         ],
         sameKeyMinInterval: 20,
         packageNamePart: ["genshin", "yuanshen", "ys.x"],
-    },{
-        gameType: "光遇",
-        gameName: "光遇",
+    }, {
+        gameType: "Light encounter",
+        gameName: "Light encounter",
         keyTypes: [{
             name: "sky_3x5",
             displayName: "3x5",
@@ -691,13 +691,13 @@ const PreDefinedGameConfigs = [
             keyLayout: keyLayoutConfigs.sky_2x4,
         }],
         variants: [
-           defaultVariantConfig
+            defaultVariantConfig
         ],
         sameKeyMinInterval: 20,
         packageNamePart: ["sky"],
-    },{
-        gameType: "逆水寒手游",
-        gameName: "逆水寒",
+    }, {
+        gameType: "Reverse the cold mobile game",
+        gameName: "Against the cold",
         keyTypes: [{
             name: "generic_3x7",
             displayName: "3x7",
@@ -713,22 +713,22 @@ const PreDefinedGameConfigs = [
         },
         {
             name: "nshm_professional_gu_zheng",
-            displayName: "专业模式(古筝)",
+            displayName: "Pro mode (Guzheng)",
             keyLayout: keyLayoutConfigs.nshm_professional_gu_zheng,
         },
         {
             name: "nshm_professional_qv_di",
-            displayName: "专业模式(葫芦丝)",
+            displayName: "Pro Mode (Hulusi)",
             keyLayout: keyLayoutConfigs.nshm_professional_qv_di,
         },
         {
             name: "nshm_professional_pi_pa",
-            displayName: "专业模式(琵琶)",
+            displayName: "Pro Mode (Pipa)",
             keyLayout: keyLayoutConfigs.nshm_professional_pi_pa,
         },
         {
             name: "nshm_professional_suo_na",
-            displayName: "专业模式(唢呐)",
+            displayName: "Professional Mode (Suona)",
             keyLayout: keyLayoutConfigs.nshm_professional_suo_na,
         }],
         variants: [
@@ -737,20 +737,20 @@ const PreDefinedGameConfigs = [
         sameKeyMinInterval: 20,
         packageNamePart: ["nshm"],
     }, {
-        gameType: "蛋仔派对",
-        gameName: "蛋仔派对",
+        gameType: "Egg Boy Party",
+        gameName: "Egg Boy Party",
         keyTypes: [
             {
                 name: "dzpd_7_8",
-                displayName: "15键",
+                displayName: "15 keys",
                 keyLayout: keyLayoutConfigs.dzpd_7_8,
-            },{
+            }, {
                 name: "dzpd_interleaved3x7",
-                displayName: "21键",
+                displayName: "21 keys",
                 keyLayout: keyLayoutConfigs.dzpd_interleaved3x7,
             }, {
                 name: "dzpd_yinterleaved36",
-                displayName: "36键",
+                displayName: "36 keys",
                 keyLayout: keyLayoutConfigs.dzpd_yinterleaved36,
             }],
         variants: [
@@ -759,10 +759,10 @@ const PreDefinedGameConfigs = [
         sameKeyMinInterval: 20,
         packageNamePart: ["party"],
     },
-    //永劫无间
+    //Naraka
     {
-        gameType: "永劫无间",
-        gameName: "永劫无间",
+        gameType: "Naraka",
+        gameName: "Naraka",
         keyTypes: [{
             name: "yjwj_curved3x7",
             displayName: "3x7",
@@ -771,37 +771,37 @@ const PreDefinedGameConfigs = [
         variants: [
             defaultVariantConfig,
             {
-                variantType: "笛子",
-                variantName: "笛子",
+                variantType: "flute",
+                variantName: "flute",
                 availableNoteRange: ["G3", "B5"],
                 noteDurationImplementionType: NoteDurationImplementionTypes.none,
             },
         ],
         sameKeyMinInterval: 20,
         packageNamePart: ["netease.l22"],
-    },{
-        gameType: "黎明觉醒",
-        gameName: "黎明觉醒",
+    }, {
+        gameType: "Dawn Awakening",
+        gameName: "Dawn Awakening",
         keyTypes: [{
             name: "generic_3x7",
             displayName: "3x7",
             keyLayout: keyLayoutConfigs.generic_3x7,
-        }],  //TODO: 钢琴 + 音域切换按钮
+        }],  //TODO: Piano + range toggle button
         variants: [
-            defaultVariantConfig 
+            defaultVariantConfig
         ],
         sameKeyMinInterval: 20,
         packageNamePart: ["toaa"],
-    },{
-        gameType: "奥比岛",
-        gameName: "奥比岛",
+    }, {
+        gameType: "Obi Island",
+        gameName: "Obi Island",
         keyTypes: [{
             name: "abd_7_8_7",
-            displayName: "22键",
+            displayName: "22 keys",
             keyLayout: keyLayoutConfigs.abd_7_8_7,
         }, {
             name: "abd_8_7",
-            displayName: "15键",
+            displayName: "15 keys",
             keyLayout: keyLayoutConfigs.abd_8_7,
         }],
         variants: [
@@ -809,16 +809,16 @@ const PreDefinedGameConfigs = [
         ],
         sameKeyMinInterval: 20,
         packageNamePart: ["aobi"],
-    },{
-        gameType: "哈利波特_魔法觉醒",
-        gameName: "哈利波特: 魔法觉醒",
+    }, {
+        gameType: "Harry Potter _ Magic Awakens",
+        gameName: "Harry Potter: Magical Awakening",
         keyTypes: [{
             name: "hpma_yinterleaved3x12",
-            displayName: "36键",
+            displayName: "36 keys",
             keyLayout: keyLayoutConfigs.hpma_yinterleaved3x12,
         }, {
             name: "hpma_2x7",
-            displayName: "14键",
+            displayName: "14 keys",
             keyLayout: keyLayoutConfigs.hpma_2x7,
         }],
         variants: [
@@ -826,32 +826,32 @@ const PreDefinedGameConfigs = [
         ],
         sameKeyMinInterval: 20,
         packageNamePart: ["harrypotter"],
-    },{
-        gameType: "第五人格",
-        gameName: "第五人格",
+    }, {
+        gameType: "Fifth personality",
+        gameName: "Fifth personality",
         keyTypes: [{
             name: "generic_3x7",
-            displayName: "21键",
+            displayName: "21 keys",
             keyLayout: keyLayoutConfigs.generic_3x7,
         }, {
             name: "hpma_yinterleaved3x12",
-            displayName: "36键",
+            displayName: "36 keys",
             keyLayout: keyLayoutConfigs.hpma_yinterleaved3x12,
         }],
         variants: [
             defaultVariantConfig,
             {
-                variantType: "玉箫",
-                variantName: "玉箫",
+                variantType: "Jade flute",
+                variantName: "Jade flute",
                 availableNoteRange: ["C3", "B4"],
                 noteDurationImplementionType: NoteDurationImplementionTypes.none,
             },
         ],
         sameKeyMinInterval: 20,
         packageNamePart: ["dwrg"],
-    },{
-        gameType: "阴阳师",
-        gameName: "阴阳师",
+    }, {
+        gameType: "Onmyoji",
+        gameName: "Onmyoji",
         keyTypes: [{
             name: "generic_3x7",
             displayName: "3x7",
@@ -862,16 +862,16 @@ const PreDefinedGameConfigs = [
         ],
         sameKeyMinInterval: 20,
         packageNamePart: ["onmyoji"],
-    },{
-        gameType: "摩尔庄园",
-        gameName: "摩尔庄园",
+    }, {
+        gameType: "Moore Manor",
+        gameName: "Moore Manor",
         keyTypes: [{
             name: "generic_3x7",
-            displayName: "21键",
+            displayName: "21 keys",
             keyLayout: keyLayoutConfigs.generic_3x7,
         }, {
             name: "hpma_yinterleaved3x12",
-            displayName: "36键",
+            displayName: "36 keys",
             keyLayout: keyLayoutConfigs.hpma_yinterleaved3x12,
         }],
         variants: [
@@ -879,22 +879,22 @@ const PreDefinedGameConfigs = [
         ],
         sameKeyMinInterval: 20,
         packageNamePart: ["mole"],
-    },{
-        gameType: "明日之后",
-        gameName: "明日之后",
+    }, {
+        gameType: "After tomorrow",
+        gameName: "After tomorrow",
         keyTypes: [{
             name: "generic_3x7",
-            displayName: "21键",
+            displayName: "21 keys",
             keyLayout: keyLayoutConfigs.generic_3x7,
         },
         {
             name: "mrzh_3x12",
-            displayName: "36键",
+            displayName: "36 keys",
             keyLayout: keyLayoutConfigs.mrzh_3x12,
         },
         {
             name: "generic_piano88",
-            displayName: "88键钢琴",
+            displayName: "88-key piano",
             keyLayout: keyLayoutConfigs.generic_piano88,
         }],
         variants: [
@@ -902,9 +902,9 @@ const PreDefinedGameConfigs = [
         ],
         sameKeyMinInterval: 20,
         packageNamePart: ["mrzh"],
-    },{
-        gameType: "元梦之星",
-        gameName: "元梦之星",
+    }, {
+        gameType: "The Star of the Yuan Dream",
+        gameName: "The Star of the Yuan Dream",
         keyTypes: [{
             name: "generic_3x7",
             displayName: "3x7",
@@ -918,8 +918,8 @@ const PreDefinedGameConfigs = [
         variants: [
             defaultVariantConfig,
             {
-                variantType: "唢呐",
-                variantName: "唢呐",
+                variantType: "Suona",
+                variantName: "Suona",
                 availableNoteRange: ["E3", "B5"],
                 noteDurationImplementionType: NoteDurationImplementionTypes.none,
                 sameKeyMinInterval: undefined,
@@ -927,69 +927,69 @@ const PreDefinedGameConfigs = [
         ],
         sameKeyMinInterval: 20,
         packageNamePart: ["com.tencent.letsgo"],
-    },{
-        gameType: "心动小镇",
-        gameName: "心动小镇",
-        //双排15键, 三排15键, 22键, 22键+半音
+    }, {
+        gameType: "Heartbeat town",
+        gameName: "Heartbeat town",
+        //Double row 15 keys, triple row 15 keys, 22 keys, 22 keys + semitone
         keyTypes: [{
             name: "dzpd_7_8",
-            displayName: "双排15键",
+            displayName: "Double-row 15 keys",
             keyLayout: keyLayoutConfigs.dzpd_7_8,
         }, {
             name: "sky_3x5",
-            displayName: "三排15键",
+            displayName: "Three rows of 15 keys",
             keyLayout: keyLayoutConfigs.sky_3x5,
         }, {
             name: "xdxz_7_7_8",
-            displayName: "22键",
+            displayName: "22 keys",
             keyLayout: keyLayoutConfigs.xdxz_7_7_8,
         }, {
             name: "xdxz_7_7_8_half",
-            displayName: "37键",
+            displayName: "37 keys",
             keyLayout: keyLayoutConfigs.xdxz_7_7_8_half,
-        }], //TODO： 8键(鼓)
+        }], //TODO： 8 Keys (Drum)
         variants: [
             defaultVariantConfig
         ],
         sameKeyMinInterval: 20,
         packageNamePart: [], //TODO:
-    },{
-        gameType: "射雕英雄传",
-        gameName: "射雕英雄传",
+    }, {
+        gameType: "Legend of the Condor Heroes",
+        gameName: "Legend of the Condor Heroes",
         keyTypes: [{
             name: "generic_3x7",
             displayName: "3x7",
             keyLayout: keyLayoutConfigs.generic_3x7,
         }],
-        variants: [  //TODO: 这个游戏应该是有长音按钮的
+        variants: [  //TODO: This game should have a long tone button
             defaultVariantConfig,
             {
-                variantType: "竹笛",
-                variantName: "竹笛",
+                variantType: "Bamboo flute",
+                variantName: "Bamboo flute",
                 availableNoteRange: ["G3", "A5"],
                 noteDurationImplementionType: NoteDurationImplementionTypes.none,
             },
             {
-                variantType: "洞箫",
-                variantName: "洞箫",
+                variantType: "Hole flute",
+                variantName: "Hole flute",
                 availableNoteRange: ["C3", "B4"],
                 noteDurationImplementionType: NoteDurationImplementionTypes.none,
             },
         ],
         sameKeyMinInterval: 20,
-        packageNamePart: ["sdyxz"], 
+        packageNamePart: ["sdyxz"],
     },
-    //qq飞车
+    //QQ Speed
     {
-        gameType: "qq飞车",
-        gameName: "qq飞车",
+        gameType: "QQ Speed",
+        gameName: "QQ Speed",
         keyTypes: [{
             name: "speedmobile_interleaved3x7_1",
-            displayName: "22键",
+            displayName: "22 keys",
             keyLayout: keyLayoutConfigs.speedmobile_interleaved3x7_1,
         }, {
             name: "speedmobile_interleaved3x12_1",
-            displayName: "37键",
+            displayName: "37 keys",
             keyLayout: keyLayoutConfigs.speedmobile_interleaved3x12_1,
         }],
         variants: [
@@ -998,10 +998,10 @@ const PreDefinedGameConfigs = [
         sameKeyMinInterval: 20,
         packageNamePart: ["speedmobile"],
     },
-    //创造与魔法
+    //Creation and magic
     {
-        gameType: "创造与魔法",
-        gameName: "创造与魔法",
+        gameType: "Creation and magic",
+        gameName: "Creation and magic",
         keyTypes: [{
             name: "sky_3x5",
             displayName: "3x5",
@@ -1013,14 +1013,14 @@ const PreDefinedGameConfigs = [
         sameKeyMinInterval: 20,
         packageNamePart: ["hero.sm"],
     },
-    //妄想山海
+    //Delusional mountains and seas
     {
-        gameType: "妄想山海",
-        gameName: "妄想山海",
+        gameType: "Delusional mountains and seas",
+        gameName: "Delusional mountains and seas",
         keyTypes: [
             {
                 name: "generic_piano36",
-                displayName: "36键钢琴",
+                displayName: "36-key piano",
                 keyLayout: keyLayoutConfigs.generic_piano36,
             },
             {
@@ -1035,16 +1035,16 @@ const PreDefinedGameConfigs = [
         packageNamePart: ["tmgp.djsy"],
     },
     {
-        gameType: "星球重启",
-        gameName: "星球:重启",
+        gameType: "Planet Reboot",
+        gameName: "Planet: Reboot",
         keyTypes: [{
             name: "generic_piano88",
-            displayName: "88键钢琴",
+            displayName: "88-key piano",
             keyLayout: keyLayoutConfigs.generic_piano88,
         },
         {
             name: "xqcq_suona33",
-            displayName: "33键唢呐",
+            displayName: "33 keys suona",
             keyLayout: keyLayoutConfigs.xqcq_suona33,
         }],
         variants: [
@@ -1054,11 +1054,11 @@ const PreDefinedGameConfigs = [
         packageNamePart: ["hermes"],
     },
     {
-        gameType: "荒野行动",
-        gameName: "荒野行动",
+        gameType: "Wilderness Action",
+        gameName: "Wilderness Action",
         keyTypes: [{
             name: "generic_piano88",
-            displayName: "88键钢琴",
+            displayName: "88-key piano",
             keyLayout: keyLayoutConfigs.generic_piano88,
         }],
         variants: [
@@ -1067,10 +1067,10 @@ const PreDefinedGameConfigs = [
         sameKeyMinInterval: 20,
         packageNamePart: ["netease.hyxd"],
     },
-    //我的世界
+    //Minecraft
     {
-        gameType: "我的世界",
-        gameName: "我的世界",
+        gameType: "Minecraft",
+        gameName: "Minecraft",
         keyTypes: [
             {
                 name: "generic_3x7",
@@ -1079,7 +1079,7 @@ const PreDefinedGameConfigs = [
             },
             {
                 name: "generic_piano36",
-                displayName: "36键钢琴",
+                displayName: "36-key piano",
                 keyLayout: keyLayoutConfigs.generic_piano36,
             }
         ],
@@ -1087,16 +1087,16 @@ const PreDefinedGameConfigs = [
             defaultVariantConfig
         ],
         sameKeyMinInterval: 20,
-        packageNamePart: ["netease.mc","netease.x19"],
+        packageNamePart: ["netease.mc", "netease.x19"],
     },
-    //迷你世界
+    //Mini world
     {
         gameType: "迷你世界",
         gameName: "迷你世界",
         keyTypes: [
             {
                 name: "generic_3x7",
-                displayName: "21键",
+                displayName: "21 keys",
                 keyLayout: keyLayoutConfigs.generic_3x7,
             },
             {
@@ -1111,14 +1111,14 @@ const PreDefinedGameConfigs = [
         sameKeyMinInterval: 20,
         packageNamePart: ["miniworld"],
     },
-    //猫和老鼠
+    //Cats and mice
     {
-        gameType: "猫和老鼠",
-        gameName: "猫和老鼠",
+        gameType: "Cats and mice",
+        gameName: "Cats and mice",
         keyTypes: [
             {
-                name: "mhls_curved3x7", 
-                displayName: "21键",
+                name: "mhls_curved3x7",
+                displayName: "21 keys",
                 keyLayout: keyLayoutConfigs.mhls_curved3x7, //最逆天的键位
             }
         ],
@@ -1128,14 +1128,14 @@ const PreDefinedGameConfigs = [
         sameKeyMinInterval: 20,
         packageNamePart: ["tom"],
     },
-    //宅时光
+    //Stay-at-home time
     {
-        gameType: "宅时光",
-        gameName: "宅时光",
+        gameType: "Stay-at-home time",
+        gameName: "Stay-at-home time",
         keyTypes: [
             {
                 name: "dzpd_yinterleaved36",
-                displayName: "36键",
+                displayName: "36 keys",
                 keyLayout: keyLayoutConfigs.dzpd_yinterleaved36,
             }
         ],
@@ -1145,19 +1145,19 @@ const PreDefinedGameConfigs = [
         sameKeyMinInterval: 20,
         packageNamePart: ["housetime"],
     },
-    //剑网3
+    //Sword Net 3
     {
-        gameType: "剑网3",
-        gameName: "剑网3",
+        gameType: "Sword Net 3",
+        gameName: "Sword Net 3",
         keyTypes: [
             {
                 name: "mhls_curved3x7",
-                displayName: "21键(弧形)",
+                displayName: "21 keys (arc)",
                 keyLayout: keyLayoutConfigs.mhls_curved3x7,
             },
             {
                 name: "jw3_sloped3x7",
-                displayName: "21键(斜线)",
+                displayName: "21 keys (slash)",
                 keyLayout: keyLayoutConfigs.jw3_sloped3x7,
             }
         ],
@@ -1168,12 +1168,12 @@ const PreDefinedGameConfigs = [
         packageNamePart: ["tmgp.jx3m"],
     },
     {
-        gameType: "以闪亮之名",
-        gameName: "以闪亮之名",
+        gameType: "In the name of Shining",
+        gameName: "In the name of Shining",
         keyTypes: [
             {
                 name: "yslzm_piano20",
-                displayName: "20键钢琴",
+                displayName: "20-key piano",
                 keyLayout: keyLayoutConfigs.yslzm_piano20,
             }
         ],
@@ -1184,17 +1184,17 @@ const PreDefinedGameConfigs = [
         packageNamePart: ["yslzm"],
     },
     {
-        gameType: "桃源深处有人家",
-        gameName: "桃源深处有人家",
+        gameType: "There are people in the depths of Taoyuan",
+        gameName: "There are people in the depths of Taoyuan",
         keyTypes: [
             {
                 name: "tysc_interleaved3x7",
-                displayName: "21键",
+                displayName: "21 keys",
                 keyLayout: keyLayoutConfigs.tysc_interleaved3x7,
             },
             {
                 name: "dzpd_7_8",
-                displayName: "15键",
+                displayName: "15 keys",
                 keyLayout: keyLayoutConfigs.dzpd_7_8,
             }
         ],
@@ -1205,12 +1205,12 @@ const PreDefinedGameConfigs = [
         packageNamePart: ["fiftyone"],
     },
     {
-        gameType: "七日世界",
-        gameName: "七日世界",
+        gameType: "Seven Days World",
+        gameName: "Seven Days World",
         keyTypes: [
             {
                 name: "qrsj_piano24",
-                displayName: "24键钢琴",
+                displayName: "24-key piano",
                 keyLayout: keyLayoutConfigs.qrsj_piano24,
             }
         ],
@@ -1220,10 +1220,10 @@ const PreDefinedGameConfigs = [
         sameKeyMinInterval: 20,
         packageNamePart: ["ohminicgos"],
     },
-    //自定义1
+    //Customization 1
     {
-        gameType: "自定义1",
-        gameName: "自定义1",
+        gameType: "Customization 1",
+        gameName: "Customization 1",
         keyTypes: [
             {
                 name: "generic_3x7",
@@ -1241,9 +1241,9 @@ const PreDefinedGameConfigs = [
         ],
         sameKeyMinInterval: 0,
         packageNamePart: [],
-    },{
-        gameType: "自定义2",
-        gameName: "自定义2",
+    }, {
+        gameType: "Custom 2",
+        gameName: "Custom 2",
         keyTypes: [
             {
                 name: "generic_3x7",
@@ -1278,14 +1278,14 @@ function GameProfile() {
 
     /**
      * @type {GameConfig | undefined}
-     * 当前生效的游戏配置
+     * The game configuration that is currently in effect
      */
     var currentGameConfig = undefined;
-    //当前生效的键位布局名
+    //The name of the current key layout
     var currentKeyTypeName = "";
-    //当前生效的变体名
+    //The name of the currently active variant
     var currentVariantType = "";
-    //当前生效的游戏类型-键位布局名, 用于在keyLocators中查找键位配置
+    //The current game type - the name of the keylocators, which is used to find the keylocators configuration
     var currentGameTypeKeyTypeName = "";
 
     /**
@@ -1293,31 +1293,31 @@ function GameProfile() {
      */
     /**
      * @type {Map<string,LocatedKeys>}
-     * @description 所有游戏的键位配置(gameType-keyTypeName , pos1, pos2)
+     * @description Keybindings for all games (gameType-keyTypeName, pos1, pos2)
      */
     var keyLocators = new Map();
 
     /**
      * @type {Array<pos2d>?}
-     * @description 按键位置数组(音高从低到高)
+     * @description Array of key positions (pitch from low to high)
      */
     var cachedKeyPos = null;
 
     /**
      * @type {Map<number,number>?}
-     * @description midi音高到按键序号(1开始)的映射
+     * @description Mapping of MIDI pitch to key sequence number (starting with 1).
      */
     var cachedPitchKeyMap = null;
 
     /**
      * @type {[number,number]?}
-     * @description midi音高范围. 加快查找速度
+     * @description MIDI pitch range. Find things faster
      */
     var cachedNoteRange = null;
 
     /**
-     * @brief 加载配置列表
-     * @param {Array<Object>} configs 配置列表
+     * @brief Load the configuration list
+     * @param {Array<Object>} configs Configure the list
      */
     this.loadGameConfigs = function (configs) {
         for (let i = 0; i < configs.length; i++) {
@@ -1326,17 +1326,17 @@ function GameProfile() {
     }
 
     /**
-     * @brief 加载默认配置列表
+     * @brief Load the list of default configurations
      */
     this.loadDefaultGameConfigs = function () {
         this.loadGameConfigs(preDefinedGameConfigs);
     }
 
     /**
-     * @brief 更新配置列表(当前配置)
+     * @brief Updating the Configuration List (Current Configuration)
      */
     this.updateGameConfigs = function () {
-        //将当前配置保存到gameConfigs中
+        //Save the current configuration to gameConfigs
         if (currentGameConfig == null) {
             return;
         }
@@ -1354,8 +1354,8 @@ function GameProfile() {
     }
 
     /**
-     * @brief 获取配置列表
-     * @returns {GameConfig[]} 配置列表
+     * @brief Get the configuration list
+     * @returns {GameConfig[]} Configure the list
      */
     this.getGameConfigs = function () {
         this.updateGameConfigs();
@@ -1363,15 +1363,15 @@ function GameProfile() {
     }
 
     /**
-     * 根据包名设定当前配置
-     * @param {string} packageName 包名
-     * @returns {boolean} 是否设置成功
+     * Set the current configuration based on the package name
+     * @param {string} packageName Package name
+     * @returns {boolean} Whether the setting is successful
      */
     this.setConfigByPackageName = function (packageName) {
-        if(packageName == null || packageName == ""){
+        if (packageName == null || packageName == "") {
             return false;
         }
-        //首先检查当前配置是否符合要求
+        //First, check whether the current configuration meets the requirements
         if (currentGameConfig != null) {
             for (let i = 0; i < currentGameConfig.packageNamePart.length; i++) {
                 if (packageName.indexOf(currentGameConfig.packageNamePart[i]) != -1) {
@@ -1379,7 +1379,7 @@ function GameProfile() {
                 }
             }
         }
-        // 检查配置列表中是否有符合要求的配置
+        // Check whether there are any configurations that meet the requirements in the configuration list
         let config = gameConfigs.find(function (config) {
             return config.packageNamePart.some(function (part) {
                 return packageName.indexOf(part) != -1;
@@ -1393,9 +1393,9 @@ function GameProfile() {
     }
 
     /**
-     * 根据配置名(游戏类型)确定当前配置
-     * @param {string} gameType 配置文件名
-     * @returns {boolean} 是否设置成功
+     * Determine the current configuration based on the configuration name (game type).
+     * @param {string} gameType The name of the configuration file
+     * @returns {boolean} Whether the setting is successful
      */
     this.setConfigByName = function (gameType) {
         let config = gameConfigs.find(function (config) {
@@ -1409,8 +1409,8 @@ function GameProfile() {
     }
 
     /**
-     * 获取配置文件名的列表
-     * @returns {Array<string>} 配置文件名列表
+     * Get a list of profile names
+     * @returns {Array<string>} A list of profile names
      */
     this.getConfigNameList = function () {
         return gameConfigs.map(function (config) {
@@ -1419,16 +1419,16 @@ function GameProfile() {
     }
 
     /**
-     * 获取所有键位配置
-     * @returns {Map<string,LocatedKeys>} 键位配置
+     * Get all key configurations
+     * @returns {Map<string,LocatedKeys>} Key configuration
      */
     this.getKeyLocators = function () {
         return keyLocators;
     }
 
     /**
-     * 设置所有键位配置 
-     * @param {Map<string,LocatedKeys>} l 键位配置
+     * Set all key configurations 
+     * @param {Map<string,LocatedKeys>} l Key configuration
      */
     this.setKeyLocators = function (l) {
         keyLocators = l;
@@ -1506,7 +1506,7 @@ function GameProfile() {
         if (variant == undefined) {
             return undefined;
         }
-        //如果为唯一的配置，则不显示配置名
+        //If it is a unique configuration, the configuration name is not displayed
         if (currentGameConfig.variants.length == 1) {
             return "";
         }
@@ -1555,7 +1555,7 @@ function GameProfile() {
         if (KeyType == undefined) {
             return undefined;
         }
-        // //如果为唯一的配置，则不显示配置名
+        // //If it is a unique configuration, the configuration name is not displayed
         // if (currentGameConfig.keyTypes.length == 1) {
         //     return "";
         // }
@@ -1571,11 +1571,11 @@ function GameProfile() {
     }
 
     /**
-     * 获取当前按键参数
-     * @returns {KeyType|undefined} 当前键位类型
+     * Gets the current key parameters
+     * @returns {KeyType|undefined} The current keybite type
      */
     this.getCurrentKeyLayout = function () {
-        if(currentGameConfig == undefined){
+        if (currentGameConfig == undefined) {
             return undefined;
         }
         return currentGameConfig.keyTypes.find(function (keyType) {
@@ -1584,7 +1584,7 @@ function GameProfile() {
     }
 
     /**
-     * 设置左上角和右下角定位点的位置
+     * Sets the position of the upper-left and lower-right anchors
      * @param {pos2dPair} pos1
      * @param {pos2dPair} pos2
      * @returns 
@@ -1593,7 +1593,7 @@ function GameProfile() {
         if (currentGameConfig == undefined) {
             return false;
         }
-        if(keyLocators[currentGameTypeKeyTypeName] == undefined){
+        if (keyLocators[currentGameTypeKeyTypeName] == undefined) {
             keyLocators[currentGameTypeKeyTypeName] = {};
         }
         keyLocators[currentGameTypeKeyTypeName][KeyLocatorTypes.LOCATOR_LEFT_TOP] = pos1;
@@ -1602,8 +1602,8 @@ function GameProfile() {
     }
 
     /**
-     * 检查当前选择的键位的左上角和右下角定位点是否已经设置
-     * @returns {boolean} 是否已经设置
+     * Check that the top-left and bottom-right anchors of the currently selected key are set
+     * @returns {boolean} Whether it has been set or not
      */
     this.checkKeyPosition = function () {
         if (currentGameConfig == undefined) {
@@ -1613,9 +1613,9 @@ function GameProfile() {
             return false;
         }
         let keys = keyLocators[currentGameTypeKeyTypeName];
-        if (keys[KeyLocatorTypes.LOCATOR_LEFT_TOP][0] == 0 && 
-            keys[KeyLocatorTypes.LOCATOR_LEFT_TOP][1] == 0 && 
-            keys[KeyLocatorTypes.LOCATOR_RIGHT_BOTTOM][0] == 0 && 
+        if (keys[KeyLocatorTypes.LOCATOR_LEFT_TOP][0] == 0 &&
+            keys[KeyLocatorTypes.LOCATOR_LEFT_TOP][1] == 0 &&
+            keys[KeyLocatorTypes.LOCATOR_RIGHT_BOTTOM][0] == 0 &&
             keys[KeyLocatorTypes.LOCATOR_RIGHT_BOTTOM][1] == 0) {
             return false;
         }
@@ -1623,11 +1623,11 @@ function GameProfile() {
     }
 
     /**
-     * 加载布局
-     * @param {boolean} [normalize] 是否使用归一化的坐标, 默认为false
+     * Load the layout
+     * @param {boolean} [normalize] Whether to use normalized coordinates or not, defaults to false
      */
     this.loadLayout = function (normalize) {
-        if(normalize == undefined){
+        if (normalize == undefined) {
             normalize = false;
         }
         if (currentGameConfig == null) {
@@ -1644,7 +1644,7 @@ function GameProfile() {
         if (currentVariant != undefined) {
             let replaceNoteMap = currentVariant.replaceNoteMap;
             if (replaceNoteMap != undefined) {
-                //将noteKeyMap中的音高替换为replaceNoteMap中的音高
+                //Replace the pitch in the noteMap with the pitch in the replaceNoteMap
                 for (let [originalNote, newNote] of Object.entries(replaceNoteMap)) {
                     if (noteKeyMap.has(originalNote)) {
                         let position = noteKeyMap.get(originalNote);
@@ -1655,7 +1655,7 @@ function GameProfile() {
             }
             let noteRange = currentVariant.availableNoteRange;
             if (noteRange != undefined) {
-                //将noteKeyMap中超出noteRange的音高删除
+                //Remove the pitch from the noteKeyMap that is out of the noteRange
                 for (let [note, position] of noteKeyMap) {
                     if (midiPitch.nameToMidiPitch(note) < midiPitch.nameToMidiPitch(noteRange[0]) || midiPitch.nameToMidiPitch(note) > midiPitch.nameToMidiPitch(noteRange[1])) {
                         noteKeyMap.delete(note);
@@ -1665,7 +1665,7 @@ function GameProfile() {
         }
         let noteKeyMapList = Object.entries(noteKeyMap);
         console.verbose(`noteKeyMapList: ${JSON.stringify(noteKeyMapList)}`);
-        //音高从低到高排序
+        //The pitches are sorted from low to high
         noteKeyMapList.sort(function (a, b) {
             return midiPitch.nameToMidiPitch(a[0]) - midiPitch.nameToMidiPitch(b[0]);
         });
@@ -1675,7 +1675,7 @@ function GameProfile() {
             cachedKeyPos.push(noteKeyMapList[i][1]);
         }
 
-        //映射到左上-右下
+        //Maps to top left - bottom right
         if (!normalize) {
             if (!this.checkKeyPosition()) {
                 return;
@@ -1699,9 +1699,9 @@ function GameProfile() {
     }
 
     /**
-     * 获取按键位置
-     * @param {number} key 按键序号(从0开始, 音高从低到高)
-     * @returns {[number, number]} 按键位置
+     * Get the key position
+     * @param {number} key Key sequence number (from 0, pitch from low to high)
+     * @returns {[number, number]} Key position
      */
     this.getKeyPosition = function (key) {
         if (cachedKeyPos == null) {
@@ -1712,8 +1712,8 @@ function GameProfile() {
     }
 
     /**
-     * 获取全部按键位置
-     * @returns {Array<pos2d>} 按键位置数组
+     * Get all key positions
+     * @returns {Array<pos2d>} Array of key positions
      */
     this.getAllKeyPositions = function () {
         if (cachedKeyPos == null) {
@@ -1724,8 +1724,8 @@ function GameProfile() {
     }
 
     /**
-     * 获取归一化的按键位置
-     * @returns {Array<pos2d>} 归一化的按键位置数组
+     * Gets the normalized key position
+     * @returns {Array<pos2d>} An array of normalized key positions
      */
     this.getNormalizedKeyPositions = function () {
         this.loadLayout(true);
@@ -1734,9 +1734,9 @@ function GameProfile() {
     }
 
     /**
-     * 根据 MIDI 音高值获取对应的按键名。
-     * @param {number} pitch - MIDI 音高值。
-     * @returns {number} MIDI 音高值对应的按键序号，从0开始，如果没有对应的按键则返回-1。
+     * Get the corresponding key name based on the MIDI pitch value.
+     * @param {number} pitch - MIDI pitch values.
+     * @returns {number} The key sequence number corresponding to the MIDI pitch value, starting at 0 and returning -1 if there is no corresponding key.
      */
     this.getKeyByPitch = function (pitch) {
         if (cachedPitchKeyMap == null) {
@@ -1751,9 +1751,9 @@ function GameProfile() {
     }
 
     /**
-     * 根据按键序号获取对应的 MIDI 音高值。
-     * @param {number} key - 按键序号，从0开始。
-     * @returns {number} 按键序号对应的 MIDI 音高值，如果没有对应的 MIDI 音高值则返回-1。
+     * Gets the corresponding MIDI pitch value based on the key sequence number.
+     * @param {number} key - The serial number of the key, starting from 0.
+     * @returns {number} The MIDI pitch value corresponding to the key sequence number, or -1 if there is no corresponding MIDI pitch value.
      */
     this.getPitchByKey = function (key) {
         if (cachedPitchKeyMap == null) {
@@ -1769,10 +1769,10 @@ function GameProfile() {
         // If no matching pitch is found, return -1
         return -1;
     }
-    
+
     /**
-     * 获取按键范围。
-     * @returns {[number,number]} 按键范围，第一个元素为最小按键序号，第二个元素为最大按键序号。从1开始。
+     * Get the range of keystrokes.
+     * @returns {[number,number]} The key range, the first element is the minimum key sequence number, and the second element is the maximum key sequence number. Start with 1.
      */
     this.getKeyRange = function () {
         if (cachedPitchKeyMap == null) {
@@ -1830,15 +1830,15 @@ function GameProfile() {
     }
 
     /**
-     * 获取物理上和指定按键距离靠近的按键
-     * @param {number} key 指定按键
-     * @returns {Array<[key: number, distance: number]>}  距离指定按键较近的按键序号和距离
+     * Gets keys that are physically close to the specified key
+     * @param {number} key Specify the key
+     * @returns {Array<[key: number, distance: number]>}  The key sequence number and distance that are closest to the specified key
      */
     this.getPhysicalClosestKeys = function (key) {
         if (cachedKeyPos == null) {
             this.loadLayout();
         }
-        if(!cachedKeyPos){
+        if (!cachedKeyPos) {
             return [];
         }
         let keyPos = cachedKeyPos[key];
@@ -1858,14 +1858,14 @@ function GameProfile() {
     }
 
     /**
-     * 获取物理上的按键最小距离
-     * @returns {number} 物理上的按键最小距离(像素)
+     * Gets the minimum distance of the physical key
+     * @returns {number} Physical minimum distance (pixels) of keys
      */
     this.getPhysicalMinKeyDistance = function () {
         if (cachedKeyPos == null) {
             this.loadLayout();
         }
-        if(!cachedKeyPos){
+        if (!cachedKeyPos) {
             return 999999;
         }
         let minDistance = 999999;
@@ -1881,7 +1881,7 @@ function GameProfile() {
     }
 
     /**
-     * 清除当前配置的缓存
+     * Clear the cache for the current configuration
      */
     this.clearCurrentConfigCache = function () {
         cachedKeyPos = null;
@@ -1890,20 +1890,20 @@ function GameProfile() {
     }
 
     /**
-     * 获取当前游戏与乐曲调式相关的提示信息
-     * @param {string} key 调号
-     * @returns {string} 提示信息
+     * Get hints about the current game and the tune
+     * @param {string} key Key signature
+     * @returns {string} Prompt information
      * @see MidiPitch.getTranspositionEstimatedKey
      */
     this.getGameSpecificHintByEstimatedKey = function (key) {
         if (currentGameConfig == undefined) {
             return "";
         }
-        if (currentGameConfig.gameType === "光遇") {
-            return `光遇: 建议演奏位置: ${skyTuneMapPosition[key]}`;
+        if (currentGameConfig.gameType === "Light encounter") {
+            return `Light Encounter: Suggest a playing position: ${skyTuneMapPosition[key]}`;
         }
-        if (currentGameConfig.gameType === "逆水寒手游") {
-            return `逆水寒手游: 建议选择调式: ${key}`;       
+        if (currentGameConfig.gameType === "Reverse the cold mobile game") {
+            return `Against the Cold: It is recommended to choose a mode: ${key}`;
         }
         return "";
     }

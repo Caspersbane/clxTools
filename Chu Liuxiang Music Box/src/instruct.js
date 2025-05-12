@@ -1,9 +1,9 @@
-// instruct.js -- 教学/跟弹模式
+// instruct.js -- Teach/follow mode
 
 var noteUtils = require('./noteUtils.js');
 
 /**
- * 简单的跟弹模式. 在按键位置显示圆点, 按键时圆点变亮, 之后逐渐变暗最终消失.
+ * Simple follow-up mode. The dot is displayed at the key position, and the dot becomes brighter when the key is pressed, then gradually darkens and finally disappears.
  * @constructor
  */
 function SimpleInstructPlayerImpl() {
@@ -32,17 +32,17 @@ function SimpleInstructPlayerImpl() {
      */
     let keyPositions = null;
     /**
-     * 按键的亮度(0~1)
+     * The brightness of the keys(0~1)
      * @type {Array<number>}
      */
     let keyBrightnesss = [];
     /**
-     * 按键大小(半径,像素)
+     * Key size (radius, pixels)
      * @type {number}
      */
     let keyRadius = 20;
     /**
-     * 衰减速度(比例/毫秒)
+     * Attenuation speed (scale/ms)
      * @type {number}
      */
     let decaySpeed = 0.005;
@@ -117,11 +117,11 @@ function SimpleInstructPlayerImpl() {
 }
 
 /**
- * 类似光遇的跟弹模式:
- * - 在下一个按键内部显示逐渐扩大的圆圈, 按键时圆圈正好填满按键, 之后消失
- * - 显示上一个按键的位置, 并使用贝塞尔曲线连接下一个按键和上一个按键
- * - 在曲线上画一个五角星, 五角星在曲线上的位置对应自上一个按键按下后的时间与两个按键之间的时间差的比值(即一个进度条)
- * - 如果两次按键是同一个按键, 则不画曲线, 在按键内画五角星
+ * Similar to the tracking mode of light encounters:
+ * - Displays a gradually expanding circle inside the next key, the circle fills the key exactly when the key is pressed, and then disappears
+ * - Displays the position of the previous key and uses a Bezier curve to connect the next key and the previous key
+ * - Draw a five-pointed star on the curve, the position of the five-pointed star on the curve corresponds to the ratio of the time since the previous key was pressed to the time difference between the two keys (i.e. a progress bar)
+ * - If the two keys are the same key, the curve is not drawn, and the five-pointed star is drawn inside the button
  */
 function SkyCotlLikeInstructPlayerImpl() {
     /**
@@ -195,8 +195,8 @@ function SkyCotlLikeInstructPlayerImpl() {
      */
     let keyOrder = new Map();
     /**
-     * @brief 设置按键的顺序, 音高越高, 数值越大
-     * @note 按键序号越大不一定音高越高, 所以需要额外的映射
+     * @brief Set the order of the buttons, the higher the pitch, the higher the value
+     * @note The higher the key number, the higher the pitch, so additional mapping is required
      */
     this.setKeyOrder = function (order) {
         keyOrder = order;
@@ -204,7 +204,7 @@ function SkyCotlLikeInstructPlayerImpl() {
 
 
     /**
-     * 按键大小(半径,像素)
+     * Key size (radius, pixels)
      * @type {number}
      */
     let keyRadius = 20;
@@ -216,7 +216,7 @@ function SkyCotlLikeInstructPlayerImpl() {
     }
 
     /**
-     * 如果下一组按键有多个，是否要对每一个按键画曲线(而不是只画最高音)
+     * If there are multiple keys in the next set, whether you want to draw a curve for each button (instead of just the highest note)
      * @type {boolean}
      */
     let drawLineToEachNextKeys = true;
@@ -228,7 +228,7 @@ function SkyCotlLikeInstructPlayerImpl() {
     }
 
     /**
-     * 是否要对下一组按键的下一组按键画较为浅的曲线
+     * Whether you want to draw a shallower curve on the next set of keys on the next set of keys
      * @type {boolean}
      */
     let drawLineToNextNextKey = true;
@@ -240,7 +240,7 @@ function SkyCotlLikeInstructPlayerImpl() {
     }
 
     /**
-     * 是否在按键外部画圆环(而不是默认的内部)
+     * Whether to draw a ring on the outside of the key (instead of the default inside)
      * @type {boolean}
      */
     let drawRingOutside = false;
@@ -252,7 +252,7 @@ function SkyCotlLikeInstructPlayerImpl() {
     }
 
     /**
-     * @brief 在指定位置画一个实心三角形
+     * @brief Draw a filled triangle at the specified location
      * @param {android.graphics.Canvas} canvas
      * @param {Paint} paint
      * @param {[number, number]} pos
@@ -262,7 +262,7 @@ function SkyCotlLikeInstructPlayerImpl() {
         const x = pos[0];
         const y = pos[1];
 
-        // 计算等边三角形的三个顶点
+        // Calculates the three vertices of an equilateral triangle
         const topX = x;
         const topY = y - radius;
         const leftX = x - radius * Math.sin(Math.PI / 3);  // sin(60°)
@@ -270,142 +270,142 @@ function SkyCotlLikeInstructPlayerImpl() {
         const rightX = x + radius * Math.sin(Math.PI / 3);
         const rightY = y + radius * Math.cos(Math.PI / 3);
 
-        // 创建路径
+        // Create a path
         const path = new Path();
 
-        // 移动到顶点
+        // Move to a vertex
         path.moveTo(topX, topY);
 
-        // 连接其他两个顶点
+        // Connect the other two vertices
         path.lineTo(leftX, leftY);
         path.lineTo(rightX, rightY);
 
-        // 闭合路径
+        // Closed path
         path.close();
 
-        // 绘制填充的三角形
+        // Draw filled triangles
         canvas.drawPath(path, paint);
     }
 
     /**
-     * @brief 画一条上凸的平滑曲线连接两个点
+     * @brief Draw a smooth curve that convex to connect the two points
      * @param {android.graphics.Canvas} canvas
      * @param {Paint} paint
      * @param {[number, number]} start
      * @param {[number, number]} end
-     * @param {number} factor 控制曲线的弯曲程度(0-1)
+     * @param {number} factor Controls how much the curve is curved(0-1)
      */
     function drawCurveLine(canvas, paint, start, end, factor) {
-        // 确保factor在0-1之间
+        // Make sure the factor is between 0-1
         factor = Math.max(0, Math.min(1, factor));
 
-        // 计算起点和终点的中点
+        // Calculate the midpoint of the start and end points
         const midX = (start[0] + end[0]) / 2;
         const midY = (start[1] + end[1]) / 2;
 
-        // 计算垂直于起点终点连线的单位向量
+        // Calculates the unit vector perpendicular to the start and end lines
         const dx = end[0] - start[0];
         const dy = end[1] - start[1];
         const length = Math.sqrt(dx * dx + dy * dy);
         const unitPerpX = -dy / length;
         const unitPerpY = dx / length;
 
-        // 计算控制点
-        // 使用factor和线段长度来决定控制点距离中点的距离
+        // Calculate control points
+        // Use factor and segment length to determine the distance between the control point and the midpoint
         const controlDistance = length * factor * 0.5;
         const controlX = midX + unitPerpX * controlDistance;
         const controlY = midY + unitPerpY * controlDistance;
 
-        // 创建路径
+        // Create a path
         const path = new android.graphics.Path();
         path.moveTo(start[0], start[1]);
         path.quadTo(controlX, controlY, end[0], end[1]);
 
-        // 在画布上绘制路径
+        // Draw a path on the canvas
         canvas.drawPath(path, paint);
     }
 
     /**
-     * @brief 画一条上凸的平滑曲线连接两个点
+     * @brief Draw a smooth curve that convex to connect the two points
      * @param {android.graphics.Canvas} canvas
      * @param {Paint} paint
      * @param {[number, number]} start
      * @param {[number, number]} end
-     * @param {number} factor 控制曲线的弯曲程度(0-1)
-     * @param {number} t 控制曲线的完成程度(0-1)
+     * @param {number} factor Controls how much the curve is curved(0-1)
+     * @param {number} t Control the degree to which the curve is completed(0-1)
      */
     function drawPartialCurveLine(canvas, paint, start, end, factor, t) {
-        // 确保factor和t在0-1之间
+        // Make sure that factor and t are between 0-1
         factor = Math.max(0, Math.min(1, factor));
         t = Math.max(0, Math.min(1, t));
 
-        // 计算起点和终点的中点
+        // Calculate the midpoint of the start and end points
         const midX = (start[0] + end[0]) / 2;
         const midY = (start[1] + end[1]) / 2;
 
-        // 计算垂直于起点终点连线的单位向量
+        // Calculates the unit vector perpendicular to the start and end lines
         const dx = end[0] - start[0];
         const dy = end[1] - start[1];
         const length = Math.sqrt(dx * dx + dy * dy);
         const unitPerpX = -dy / length;
         const unitPerpY = dx / length;
 
-        // 计算控制点
-        // 使用factor和线段长度来决定控制点距离中点的距离
+        // Calculate control points
+        // Use factor and segment length to determine the distance between the control point and the midpoint
         const controlDistance = length * factor * 0.5;
         const controlX = midX + unitPerpX * controlDistance;
         const controlY = midY + unitPerpY * controlDistance;
 
-        // 创建路径
+        // Create a path
         const path = new android.graphics.Path();
         path.moveTo(start[0], start[1]);
         path.quadTo(controlX, controlY, end[0], end[1]);
 
-        // 使用PathMeasure测量路径
+        // Use PathMeasure to measure the path
         const pathMeasure = new android.graphics.PathMeasure(path, false);
         const pathLength = pathMeasure.getLength();
 
-        // 创建一个新的路径来存储部分路径
+        // Create a new path to store part of the path
         const partialPath = new android.graphics.Path();
         pathMeasure.getSegment(0, pathLength * t, partialPath, true);
 
-        // 在画布上绘制部分路径
+        // Draw a partial path on the canvas
         canvas.drawPath(partialPath, paint);
     }
 
     /**
-     * @brief 对于上述平滑曲线，给定从起点算起的整条曲线的长度比例，计算曲线上该点所在位置
+     * @brief For the smoothed curve described above, the position of the point on the curve is calculated, given the proportion of the length of the entire curve from the starting point
      * @param {[number, number]} start
      * @param {[number, number]} end
-     * @param {number} progress 从起点算起的整条曲线的长度比例 (0-> 起点, 1-> 终点)
-     * @param {number} factor 控制曲线的弯曲程度
-     * @returns {[number, number]} 曲线上该点所在位置
+     * @param {number} progress Proportion of the length of the entire curve from the start point (0-> starting point, 1-> end point)
+     * @param {number} factor Controls how much the curve is curved
+     * @returns {[number, number]} The location of the point on the curve
      */
     function getPointOnCurve(start, end, progress, factor) {
-        // 确保progress和factor在0-1之间
+        // Make sure the progress and factor are between 0-1
         progress = Math.max(0, Math.min(1, progress));
         factor = Math.max(0, Math.min(1, factor));
 
-        // 计算起点和终点的中点
+        // Calculate the midpoint of the start and end points
         const midX = (start[0] + end[0]) / 2;
         const midY = (start[1] + end[1]) / 2;
 
-        // 计算垂直于起点终点连线的单位向量
+        // Calculates the unit vector perpendicular to the start and end lines
         const dx = end[0] - start[0];
         const dy = end[1] - start[1];
         const length = Math.sqrt(dx * dx + dy * dy);
         const unitPerpX = -dy / length;
         const unitPerpY = dx / length;
 
-        // 计算控制点
+        // Calculate control points
         const controlDistance = length * factor * 0.5;
         const controlX = midX + unitPerpX * controlDistance;
         const controlY = midY + unitPerpY * controlDistance;
 
-        // 使用progress作为t的近似值
+        // Use progress as an approximation of t
         const t = progress;
 
-        // 计算贝塞尔曲线上的点
+        // Calculate points on Bezier curves
         const x = (1 - t) * (1 - t) * start[0] + 2 * (1 - t) * t * controlX + t * t * end[0];
         const y = (1 - t) * (1 - t) * start[1] + 2 * (1 - t) * t * controlY + t * t * end[1];
 
@@ -424,12 +424,12 @@ function SkyCotlLikeInstructPlayerImpl() {
      */
     let lastKeys = [[-1], 0, {}];
     let lastKeysTime = 0;
-    
+
     /**
      * @param {android.graphics.Canvas} canvas 
      */
     this.draw = function (canvas) {
-        //清空
+        //empty
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         if (keyPositions == null) {
             return;
@@ -438,7 +438,7 @@ function SkyCotlLikeInstructPlayerImpl() {
 
         let now = new Date().getTime();
 
-        //1. 确定要处理的按键
+        //1. Decide which keys to process
         let activeKeys = [];
         let nextTime = now - lastKeysTime + lastKeys[1] + lookAheadTime;
         for (let i = position; i < keyTimeList.length; i++) {
@@ -450,20 +450,20 @@ function SkyCotlLikeInstructPlayerImpl() {
             activeKeys.push(keys);
         }
 
-        //2. 给所有的按键画灰色实心圆, 作为背景
+        //2. Draw a gray solid circle for all the keys as a background
         for (let i = 0; i < keyPositions.length; i++) {
             let pos = keyPositions[i];
             paint.setARGB(48, 0, 0, 0);
             paint.setStyle(Paint.Style.FILL);
             canvas.drawCircle(pos[0], pos[1], keyRadius, paint);
-            //+ 外侧画一个白色的圆环
+            //+ Draw a white circle on the outside
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(4);
             paint.setARGB(255, 255, 255, 255);
             canvas.drawCircle(pos[0], pos[1], keyRadius, paint);
         }
 
-        //3. 给要处理的按键画空心圆. 下一组按键用黄色，其他用灰色
+        //3. Draw a hollow circle for the button you want to process. The next set of keys is yellow, and the others are gray
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(5);
         for (let i = 0; i < activeKeys.length; i++) {
@@ -485,7 +485,7 @@ function SkyCotlLikeInstructPlayerImpl() {
             }
         }
 
-        //4. 给之前和之后这两组按键之间画曲线
+        //4. Draw a curve between the before and after sets of buttons
         let fromKey = lastKeys[0].reduce((a, b) => keyOrder.get(a) > keyOrder.get(b) ? a : b);
         if (activeKeys.length > 0 && fromKey != -1) {
             let toKeys = []
@@ -508,13 +508,13 @@ function SkyCotlLikeInstructPlayerImpl() {
                     paint.setStyle(Paint.Style.STROKE);
                     paint.setStrokeWidth(4);
                     drawCurveLine(canvas, paint, fromPos, toPos, 0.5);
-                    // 如果两组按键包含相同的按键, 则不要画移动的三角形（造成混淆）
+                    // If two sets of keys contain the same key, don't draw a moving triangle (confusing)
                     if (!haveSameKey) {
                         let starPos = getPointOnCurve(fromPos, toPos, progress, 0.5);
                         paint.setStyle(Paint.Style.FILL);
                         drawFilledTriangle(canvas, paint, starPos, keyRadius / 3);
                     }
-                    //如果前后两组按键相同, 则在按键内画一个五角星(三角形)
+                    //If the two sets of keys are the same, draw a five-pointed star (triangle) inside the buttons.
                     if (toKey == fromKey) {
                         let starPos = keyPositions[fromKey];
                         paint.setStyle(Paint.Style.FILL);
@@ -524,7 +524,7 @@ function SkyCotlLikeInstructPlayerImpl() {
             }
         }
 
-        // 5. 给下一组按键的下一组按键画浅色曲线
+        // 5. Draw a light curve for the next set of keys on the next set of keys
         if (drawLineToNextNextKey && activeKeys.length > 1) {
             let fromKey = activeKeys[0][0].reduce((a, b) => keyOrder.get(a) > keyOrder.get(b) ? a : b);
             let toKey = activeKeys[1][0].reduce((a, b) => keyOrder.get(a) > keyOrder.get(b) ? a : b);

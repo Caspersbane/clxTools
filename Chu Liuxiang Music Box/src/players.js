@@ -1,5 +1,5 @@
 //@ts-check
-//players.js -- 实现播放/演奏功能
+//players.js -- Implement play/play functions
 
 var { SimpleInstructPlayerImpl, SkyCotlLikeInstructPlayerImpl } = require("./instruct.js");
 
@@ -33,8 +33,8 @@ var PlayerType = {
  */
 function AutoJsGesturePlayerImpl() {
     /**
-    * @brief 执行一组操作
-    * @param {Gestures} _gestures 手势
+    * @brief Perform a set of actions
+    * @param {Gestures} _gestures gesture
     */
     this.exec = function (_gestures) {
         gestures.apply(null, _gestures);
@@ -63,65 +63,65 @@ const PlayerStates = {
  * @typedef {[delay: number,duration: number, points: ...import("./gameProfile").pos2d[]]} Gesture
  * @typedef {Array<Gesture>} Gestures
  * @typedef {object} PlayerImpl
- * @property {boolean} doTransform 是否要使用transformGesture函数处理手势
- * @property {(function(Gestures):void)|(function(import('./noteUtils').PackedKey):void)} exec 执行一组操作
- * @property {function(): PlayerType} getType 获取播放器类型
- * @property {function(object):void} [setGestureTimeList] 设置手势和时间数据
- * @property {function(number):void} [seekTo] 设置播放位置
- * @property {function():void} [next] 播放下一个音符
- * @property {function(PlayerStates):void} [setState] 设置播放状态
+ * @property {boolean} doTransform Whether you want to use the transformGesture function to handle gestures
+ * @property {(function(Gestures):void)|(function(import('./noteUtils').PackedKey):void)} exec Perform a set of actions
+ * @property {function(): PlayerType} getType Get the player type
+ * @property {function(object):void} [setGestureTimeList] Set gesture and time data
+ * @property {function(number):void} [seekTo] Set the playback position
+ * @property {function():void} [next] Play the next note
+ * @property {function(PlayerStates):void} [setState] Set the playback status
  */
 
 /**
- * 播放器. 可能有不同的实现
+ * Player. There may be different implementations
  * @param {PlayerImpl} playerImpl 
  */
-function Player(playerImpl){
+function Player(playerImpl) {
 
     this.PlayerStates = PlayerStates;
 
     /**
      * @type {PlayerStates}
-     * @description 播放器状态
+     * @description Player state
      * @private
      */
     let playerState = PlayerStates.UNINITIALIZED;
 
     /**
      * @type {Array<[Gestures, number]>|Array<import('./noteUtils').PackedKey>?}
-     * @description 手势和时间数据
+     * @description Gesture and time data
      */
     let gestureTimeList = null;
 
     /**
      * @type {function(number):void}
-     * @description 每播放一个音符的回调函数
+     * @description Callback function for each note played
      */
-    let onPlayNote = function(/** @type {number} */ position){};
+    let onPlayNote = function (/** @type {number} */ position) { };
 
-        /**
-     * @type {function(number):void}
-     * @description 状态切换回调函数
-     */
-    let onStateChange = function(/** @type {number} */ newState){};
+    /**
+ * @type {function(number):void}
+ * @description State switch callback function
+ */
+    let onStateChange = function (/** @type {number} */ newState) { };
 
     /**
      * @type Thread
-     * @description 播放线程
+     * @description Play the thread
      * @private
      */
     let playerThread = null;
 
     /**
      * @type number
-     * @description 播放位置(音符序号)
+     * @description Playback Position (Note Serial Number)
      * @private
      */
     let position = 0;
 
     /**
      * @type number
-     * @description 播放速度(倍数, <1减速, >1加速)
+     * @description Playback speed (multiplier, <1 deceleration, >1 acceleration)
      * @private
      * @default 1
      */
@@ -129,7 +129,7 @@ function Player(playerImpl){
 
     /**
      * @type number
-     * @description 点击位置的平均偏差(像素)
+     * @description Mean deviation of click position (pixels)
      * @private
      * @default 0
      */
@@ -140,44 +140,44 @@ function Player(playerImpl){
      */
     let clickPositionDeviationRandomizer = null;
 
-    let implSync = function(){
+    let implSync = function () {
         if (playerImpl.setState != null) playerImpl.setState(playerState);
         if (playerImpl.seekTo != null) playerImpl.seekTo(position);
     }
 
-    this.getType = function(){
+    this.getType = function () {
         return playerImpl.getType();
     }
 
-    this.getImplementationInstance = function(){
+    this.getImplementationInstance = function () {
         return playerImpl;
     }
 
     /**
-     * @brief 设置手势和时间数据
+     * @brief Set gesture and time data
      * @param {Array<[Gestures, number]>|Array<import('./noteUtils').PackedKey>} gestureTimeList_ 手势和时间数据
      */
-    this.setGestureTimeList = function(gestureTimeList_){
+    this.setGestureTimeList = function (gestureTimeList_) {
         gestureTimeList = gestureTimeList_;
-        if(playerImpl.setGestureTimeList != null){
+        if (playerImpl.setGestureTimeList != null) {
             playerImpl.setGestureTimeList(gestureTimeList_);
         }
     }
 
     /**
-     * @brief 设置点击位置的平均偏差(像素)
-     * @param {number} clickPositionDeviationPx_ 点击位置的平均偏差(像素)
+     * @brief Set the average deviation of the click position in pixels
+     * @param {number} clickPositionDeviationPx_ Mean deviation of click position (pixels)
      */
-    this.setClickPositionDeviationPx = function(clickPositionDeviationPx_){
+    this.setClickPositionDeviationPx = function (clickPositionDeviationPx_) {
         clickPositionDeviationPx = clickPositionDeviationPx_;
         clickPositionDeviationRandomizer = new NormalDistributionRandomizer(0, clickPositionDeviationPx);
     }
 
     /**
-     * @brief 启动播放
+     * @brief Start playback
      * 
      */
-    this.start = function(){
+    this.start = function () {
         playerState = PlayerStates.UNINITIALIZED;
         position = 0;
         implSync();
@@ -186,27 +186,27 @@ function Player(playerImpl){
     }
 
     /**
-     * @brief 暂停播放
+     * @brief Pause playback
      */
-    this.pause = function(){
+    this.pause = function () {
         playerState = PlayerStates.PAUSED;
         implSync();
     }
 
     /**
-     * @brief 继续播放
+     * @brief Continue playing
      */
-    this.resume = function(){
+    this.resume = function () {
         playerState = PlayerStates.SEEK_END;
         implSync();
     }
 
     /**
-     * @brief 设置播放位置
-     * @param {number} position_ 播放位置(音符序号)
-     * @note TODO: 线程安全?
+     * @brief Set the playback position
+     * @param {number} position_ Playback Position (Note Serial Number)
+     * @note TODO: Thread-safe?
      */
-    this.seekTo = function(position_){
+    this.seekTo = function (position_) {
         if (playerState == PlayerStates.PLAYING || playerState == PlayerStates.SEEK_END)
             playerState = PlayerStates.SEEKING;
         position = position_;
@@ -214,58 +214,58 @@ function Player(playerImpl){
     }
 
     /**
-     * @brief 获取播放位置
-     * @returns {number} 播放位置(音符序号)
+     * @brief Get the playback location
+     * @returns {number} Playback Position (Note Serial Number)
      */
-    this.getCurrentPosition = function(){
+    this.getCurrentPosition = function () {
         return position;
     }
 
     /**
-     * @brief 获取播放状态
-     * @returns {number} 播放状态
+     * @brief Get playback status
+     * @returns {number} Playback status
      */
-    this.getState = function(){
+    this.getState = function () {
         return playerState;
     }
 
     /**
-     * @brief 获取播放速度
-     * @returns {number} 播放速度(倍数, <1减速, >1加速)
+     * @brief Get the playback speed
+     * @returns {number} Playback speed (multiplier, <1 deceleration, >1 acceleration)
      */
-    this.getPlaySpeed = function(){
+    this.getPlaySpeed = function () {
         return playSpeed;
     }
 
     /**
-     * @brief 设置播放速度
-     * @param {number} playSpeed_ 播放速度(倍数, <1减速, >1加速)
+     * @brief Set the playback speed
+     * @param {number} playSpeed_ Playback speed (multiplier, <1 deceleration, >1 acceleration)
      */
-    this.setPlaySpeed = function(playSpeed_){
+    this.setPlaySpeed = function (playSpeed_) {
         playSpeed = playSpeed_;
     }
     /**
-     * @brief 设置回调函数
-     * @param {function(number):void} onPlayNote_ 每播放一个音符的回调函数
+     * @brief Set the callback function
+     * @param {function(number):void} onPlayNote_ Callback function for each note played
      */
-    this.setOnPlayNote = function(onPlayNote_){
+    this.setOnPlayNote = function (onPlayNote_) {
         onPlayNote = onPlayNote_;
     }
 
     /**
-     * @brief 状态切换回调函数
-     * @param {function(number):void} onStateChange_ 每次状态切换时的回调函数
+     * @brief State switch callback function
+     * @param {function(number):void} onStateChange_ The callback function for each state switch
      */
-    this.setOnStateChange = function(onStateChange_){
+    this.setOnStateChange = function (onStateChange_) {
         onStateChange = onStateChange_;
     }
 
     /**
-     * @brief 停止播放并释放资源
-     * @returns {boolean} 是否成功停止
+     * @brief Stop playback and release resources
+     * @returns {boolean} Whether the stop was successful
      */
-    this.stop = function(){
-        if(playerThread != null){
+    this.stop = function () {
+        if (playerThread != null) {
             playerThread.interrupt();
             playerThread.join();
             playerThread = null;
@@ -279,8 +279,8 @@ function Player(playerImpl){
     }
 
     /**
-     * @brief 执行一组操作
-     * @param {Gestures} _gestures 手势
+     * @brief Perform a set of actions
+     * @param {Gestures} _gestures gesture
      */
     this.exec = function (_gestures) {
         if (playerImpl.doTransform)
@@ -290,18 +290,18 @@ function Player(playerImpl){
     }
 
     /**
-     * @brief 对这组手势做处理
-     * @param {Gestures} gestures 手势
-     * @returns {Gestures} 处理后的手势
+     * @brief Work on this set of gestures
+     * @param {Gestures} gestures gesture
+     * @returns {Gestures} Post-processing gestures
      */
-    function transformGesture(gestures){
-        //随机偏移
+    function transformGesture(gestures) {
+        //Random offset
         if (clickPositionDeviationPx > 0) {
             gestures.forEach(gesture => {
                 let deviation, angle;
                 do {
                     deviation = clickPositionDeviationRandomizer.next();
-                } while (Math.abs(deviation) > 2 * clickPositionDeviationPx); 
+                } while (Math.abs(deviation) > 2 * clickPositionDeviationPx);
                 angle = Math.random() * 2 * Math.PI;
                 gesture[2][0] += deviation * Math.cos(angle);
                 gesture[2][1] += deviation * Math.sin(angle);
@@ -311,11 +311,11 @@ function Player(playerImpl){
     }
 
     /**
-     * @brief 播放线程函数
+     * @brief Play thread functions
      * @private
      */
-    function playerThreadFunc(){
-        if(gestureTimeList == null){
+    function playerThreadFunc() {
+        if (gestureTimeList == null) {
             console.error("gestureTimeList is null");
             return;
         }
@@ -333,33 +333,33 @@ function Player(playerImpl){
                 case PlayerStates.FINISHED:
                 case PlayerStates.UNINITIALIZED:
                 case PlayerStates.PAUSED: //(->SEEK_END)
-                    sleep(500); //循环等待状态变更 
+                    sleep(500); //Wait for the state to change in a loop 
                     break;
                 case PlayerStates.SEEKING: //(->SEEK_END)
                     playerState = PlayerStates.SEEK_END;
-                    sleep(500); //在这500ms内, 状态可能会变回SEEKING. 继续循环
+                    sleep(500); //Within 500ms, the status may change back to SEEKING. Keep the cycle
                     break;
-                case PlayerStates.SEEK_END:{ //(->PLAYING)
+                case PlayerStates.SEEK_END: { //(->PLAYING)
                     playerState = PlayerStates.PLAYING;
-                    if(position == 0){
-                        startTimeAbs = new Date().getTime() + 100; //第一次播放, 从100ms前开始
+                    if (position == 0) {
+                        startTimeAbs = new Date().getTime() + 100; //The first play, starting before 100ms
                         break;
                     }
-                    //设置播放起始时间
-                    let currentNoteTimeAbs = gestureTimeList[position][1]*(1/playSpeed);
+                    //Set the playback start time
+                    let currentNoteTimeAbs = gestureTimeList[position][1] * (1 / playSpeed);
                     startTimeAbs = new Date().getTime() - currentNoteTimeAbs;
                     onPlayNote(position);
                     break;
                 }
-                case PlayerStates.PLAYING:{ //(->PAUSED/FINISHED/SEEKING)
+                case PlayerStates.PLAYING: { //(->PAUSED/FINISHED/SEEKING)
                     if (position >= gestureTimeList.length) {
                         playerState = PlayerStates.FINISHED;
                         break;
                     }
                     let currentNote = gestureTimeList[position][0];
-                    let currentNoteTimeAbs = gestureTimeList[position][1]*(1/playSpeed);
+                    let currentNoteTimeAbs = gestureTimeList[position][1] * (1 / playSpeed);
                     let elapsedTimeAbs = new Date().getTime() - startTimeAbs;
-                    let delayTime = currentNoteTimeAbs - elapsedTimeAbs - 7; //7ms是手势执行时间
+                    let delayTime = currentNoteTimeAbs - elapsedTimeAbs - 7; //7ms is the gesture execution time
                     if (delayTime > 0) {
                         while (delayTime > 0) {
                             sleep(Math.min(delayTime, 467));
@@ -368,8 +368,8 @@ function Player(playerImpl){
                                 break;
                             }
                         }
-                    }else{
-                        //直接跳过
+                    } else {
+                        //Just skip it
                         position++;
                         break;
                     }
@@ -394,6 +394,5 @@ module.exports = {
     "PlayerType": PlayerType,
     "AutoJsGesturePlayer": Player.bind(null, new AutoJsGesturePlayerImpl()),
     "SimpleInstructPlayer": Player.bind(null, new SimpleInstructPlayerImpl()),
-    "SkyCotlLikeInstructPlayer":  Player.bind(null, new SkyCotlLikeInstructPlayerImpl()),
+    "SkyCotlLikeInstructPlayer": Player.bind(null, new SkyCotlLikeInstructPlayerImpl()),
 }
-    

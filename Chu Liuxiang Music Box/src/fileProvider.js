@@ -17,15 +17,15 @@ function FileProvider() {
 
     /**
      * @typedef {Object} UserMusicList
-     * @property {string} name - 歌单名
-     * @property {Array<string>} musicFiles - 歌单内的音乐文件列表
+     * @property {string} name - Song single name
+     * @property {Array<string>} musicFiles - A list of music files in a playlist
      */
 
     let userMusicLists = /** @type {Array<UserMusicList>} */ (configuration.getJsonFromFile("config_userMusicLists"));
     if (!userMusicLists) {
         userMusicLists = [
             {
-                name: "收藏",
+                name: "collection",
                 musicFiles: []
             },
         ];
@@ -55,7 +55,7 @@ function FileProvider() {
         if (fileCharSet) {
             return tryListMusicFilesInsideZip(zipPath, fileCharSet);
         }
-        
+
         for (let charSet of charSets) {
             try {
                 let res = tryListMusicFilesInsideZip(zipPath, charSet);
@@ -65,14 +65,14 @@ function FileProvider() {
                 console.error(`Failed to list music files inside zip file ${zipPath} with charset ${charSet}: ${e}`);
             }
         }
-        throw new Error(`Zip文件 ${zipPath} 内的文件名编码未知, 读取失败! (尝试在电脑上解压后重新压缩)`);
+        throw new Error(`Zip file ${zipPath} The encoding of the file name within is unknown, and the read failed! (Try unzipping on your computer and then recompressing)`);
     }
 
     /**
-     * 从 zip 文件中提取音乐文件到临时目录
-     * @param {string} zipName - zip 文件名
-     * @param {string} musicName - 音乐文件名
-     * @returns {string?} - 返回音乐文件相对于音乐目录的路径(如"tmp/xxx.mid"), 如果提取失败则返回null
+     * Extract music files from zip files to a temporary directory
+     * @param {string} zipName - zip file name
+     * @param {string} musicName - The name of the music file
+     * @returns {string?} - Returns the path of the music file relative to the music directory (e.g. "tmp/xxx.mid"), or null if the extraction fails
      */
     this.extractMusicFromZip = function (zipName, musicName) {
         const zipPath = musicDir + zipName;
@@ -103,8 +103,8 @@ function FileProvider() {
     }
 
     /**
-     * 读取所有直接存放在音乐文件夹下的音乐文件的列表
-     * @returns {Array<string>} - 返回音乐文件列表, 如["music1.mid", "music2.mid"]
+     * Read a list of all music files placed directly in the music folder
+     * @returns {Array<string>} - Returns a list of music files, such as["music1.mid", "music2.mid"]
      */
     this.listDiscreteMusicFiles = function () {
         return files.listDir(musicDir, function (name) {
@@ -113,8 +113,8 @@ function FileProvider() {
     }
 
     /**
-     * 读取所有 zip 文件中的音乐文件的列表
-     * @returns {Array<string>} - 返回音乐文件列表, 如["1.zip/music1.mid", "2.zip/music2.mid"]
+     * Read a list of music files in all zip files
+     * @returns {Array<string>} - Returns a list of music files, e.g. ["1.zip/music1.mid", "2.zip/music2.mid"]
      */
     this.listAllZippedMusicFiles = function () {
         return files.listDir(musicDir, function (name) {
@@ -129,8 +129,8 @@ function FileProvider() {
     }
 
     /**
-     * 读取所有云端音乐文件的列表
-     * @returns {Array<string>} - 返回音乐文件列表, 如["cloud:chimomoapi/1.json", "cloud:chimomoapi/2.json"]
+     * Read a list of all your music files in the cloud
+     * @returns {Array<string>} - Returns a list of music files, such as["cloud:chimomoapi/1.json", "cloud:chimomoapi/2.json"]
      */
     this.listAllCloudMusicFiles = function () {
         const cloudMusicList = configuration.getJsonFromFile(chimomoApiMusicListKey) || [];
@@ -140,9 +140,9 @@ function FileProvider() {
     };
 
     /**
-     * 加载云端音乐文件, 提取到临时目录
-     * @param {string} musicName - 音乐文件名
-     * @param {(err: Error?, succeeded: boolean) => void} callback - 回调函数
+     * Load the music files in the cloud and extract them to a temporary directory
+     * @param {string} musicName - The name of the music file
+     * @param {(err: Error?, succeeded: boolean) => void} callback - Callback function
      */
     this.loadCloudMusicFile = function (musicName, callback) {
         const nameParts = musicName.split("/");
@@ -175,10 +175,10 @@ function FileProvider() {
     }
 
     /**
-     * 从临时目录加载云端音乐文件
-     * @param {string} musicName - 音乐文件名
-     * @returns {string?} - 返回音乐文件路径, 如果加载失败则返回null
-     * //TODO: 缓存过期/刷新机制?
+     * Load cloud music files from a temporary directory
+     * @param {string} musicName - The name of the music file
+     * @returns {string?} - Returns the music file path, or null if the load fails
+     * //TODO: Cache expiration/refresh mechanism?
      */
     this.loadCloudMusicFileFromTmp = function (musicName) {
         const nameParts = musicName.split("/");
@@ -190,14 +190,14 @@ function FileProvider() {
     }
 
     /**
-     * 缓存的音乐文件列表
+     * A list of cached music files
      * @type {Array<string>}
      */
     let cachedAllMusicFiles = []
 
     /**
-     * 读取所有音乐文件的列表
-     * @returns {Array<string>} - 返回音乐文件列表, 如["music1.mid", "music2.mid", "1.zip/music1.mid", "2.zip/music2.mid", "cloud:chimomoapi/1.json", "cloud:chimomoapi/2.json"]
+     * Read a list of all your music files
+     * @returns {Array<string>} - Back to the list of music files, 如["music1.mid", "music2.mid", "1.zip/music1.mid", "2.zip/music2.mid", "cloud:chimomoapi/1.json", "cloud:chimomoapi/2.json"]
      */
     this.listAllMusicFiles = function () {
         cachedAllMusicFiles = this.listDiscreteMusicFiles()
@@ -207,8 +207,8 @@ function FileProvider() {
     }
 
     /**
-     * 读取所有音乐文件的列表, 但是这个有缓存
-     * @returns {Array<string>} - 返回音乐文件列表, 如["music1.mid", "music2.mid", "1.zip/music1.mid", "2.zip/music2.mid", "cloud:chimomoapi/1.json", "cloud:chimomoapi/2.json"]
+     * Reads a list of all music files, but this one has a cache
+     * @returns {Array<string>} - Returns a list of music files, such as["music1.mid", "music2.mid", "1.zip/music1.mid", "2.zip/music2.mid", "cloud:chimomoapi/1.json", "cloud:chimomoapi/2.json"]
      */
     this.listAllMusicFilesWithCache = function () {
         if (cachedAllMusicFiles.length === 0) {
@@ -218,16 +218,16 @@ function FileProvider() {
     }
 
     /**
-     * 清除缓存
+     * Clear the cache
      */
     this.refreshAllMusicFilesListCache = function () {
         cachedAllMusicFiles = [];
     }
 
     /**
-     * 更新云端音乐列表
-     * @param {(err: Error?, succeeded: boolean) => void} [callback] - 回调函数
-     * @param {boolean} [force] - 是否强制刷新(忽略缓存)
+     * Update the cloud music list
+     * @param {(err: Error?, succeeded: boolean) => void} [callback] - Callback function
+     * @param {boolean} [force] - Whether to force a flush (ignore cache)
      */
     this.updateCloudMusicList = function (callback, force) {
         let chimomoApiLastUpdate = configuration.getJsonFileLastModifiedTime(chimomoApiMusicListKey);
@@ -253,15 +253,15 @@ function FileProvider() {
     }
 
     /**
-     * 加载音乐文件. 如果文件在zip文件内, 则提取到临时目录, 否则直接返回文件路径
-     * @param {string} musicName - 音乐文件名
-     * @returns {string?} - 返回音乐文件路径, 如果加载失败则返回null
+     * Load the music file. If the file is inside a zip file, it is extracted to a temporary directory, otherwise the file path is returned directly
+     * @param {string} musicName - The name of the music file
+     * @returns {string?} - Returns the music file path, or null if the load fails
      * @example 
-     * // 加载 disk.mid
+     * // load disk.mid
      * fileProvider.loadMusicFile("disk.mid") -> "disk.mid"
      * // 加载 1.zip/disk.mid
      * fileProvider.loadMusicFile("1.zip/disk.mid") -> "tmp/disk.mid"
-     * @note 对于云端的音乐文件, 需要先调用 loadCloudMusicFile 将文件下载到本地!
+     * @note For music files in the cloud, you need to call loadCloudMusicFile to download the files locally!
      */
     this.loadMusicFile = function (musicName) {
         const nameParts = musicName.split("/");
@@ -275,7 +275,7 @@ function FileProvider() {
     }
 
     /**
-     * 清除音乐文件缓存
+     * Clear the music file cache
      */
     this.clearMusicFileCache = function () {
         files.removeDir(musicDir + tmpSubDir);
@@ -283,7 +283,7 @@ function FileProvider() {
     }
 
     /**
-     * 保存歌单数据到配置文件
+     * Save playlist data to a configuration file
      * @private
      */
     function saveUserMusicLists() {
@@ -291,9 +291,9 @@ function FileProvider() {
     }
 
     /**
-     * 创建新歌单
-     * @param {string} name - 歌单名称
-     * @returns {boolean} - 创建成功返回true,否则返回false
+     * Create a new playlist
+     * @param {string} name - The name of the playlist
+     * @returns {boolean} - Returns true if the creation succeeds, or false otherwise
      */
     this.createMusicList = function (name) {
         if (userMusicLists.some(list => list.name === name)) {
@@ -305,9 +305,9 @@ function FileProvider() {
     }
 
     /**
-     * 删除歌单
-     * @param {string} name - 歌单名称
-     * @returns {boolean} - 删除成功返回true,否则返回false
+     * Delete a playlist
+     * @param {string} name - The name of the playlist
+     * @returns {boolean} - Returns true if the deletion is successful, false otherwise
      */
     this.deleteMusicList = function (name) {
         const initialLength = userMusicLists.length;
@@ -320,10 +320,10 @@ function FileProvider() {
     }
 
     /**
-     * 重命名歌单
-     * @param {string} oldName - 原歌单名称
-     * @param {string} newName - 新歌单名称
-     * @returns {boolean} - 重命名成功返回true,否则返回false
+     * Rename the playlist
+     * @param {string} oldName - The name of the original playlist
+     * @param {string} newName - The name of the new playlist
+     * @returns {boolean} - Returns true if the rename is successful, false otherwise
      */
     this.renameMusicList = function (oldName, newName) {
         if (userMusicLists.some(list => list.name === newName)) {
@@ -339,10 +339,10 @@ function FileProvider() {
     }
 
     /**
-     * 添加歌曲到歌单
-     * @param {string} listName - 歌单名称
-     * @param {string} musicFile - 歌曲文件名
-     * @returns {boolean} - 添加成功返回true,否则返回false
+     * Add songs to playlists
+     * @param {string} listName - The name of the playlist
+     * @param {string} musicFile - The file name of the song
+     * @returns {boolean} - Returns true if the addition is successful, false otherwise
      */
     this.addMusicToList = function (listName, musicFile) {
         const list = userMusicLists.find(list => list.name === listName);
@@ -355,10 +355,10 @@ function FileProvider() {
     }
 
     /**
-     * 从歌单删除歌曲
-     * @param {string} listName - 歌单名称
-     * @param {string} musicFile - 歌曲文件名
-     * @returns {boolean} - 删除成功返回true,否则返回false
+     * Delete a song from a playlist
+     * @param {string} listName - The name of the playlist
+     * @param {string} musicFile - The file name of the song
+     * @returns {boolean} - Returns true if the deletion is successful, false otherwise
      */
     this.removeMusicFromList = function (listName, musicFile) {
         const list = userMusicLists.find(list => list.name === listName);
@@ -374,9 +374,9 @@ function FileProvider() {
     }
 
     /**
-     * 列出歌单中的歌曲
-     * @param {string} listName - 歌单名称
-     * @returns {Array<string>|null} - 返回歌曲列表,如果歌单不存在则返回null
+     * Lists the songs in the playlist
+     * @param {string} listName - The name of the playlist
+     * @returns {Array<string>|null} - Returns a list of songs, or null if the playlist does not exist
      */
     this.listMusicInList = function (listName) {
         const list = userMusicLists.find(list => list.name === listName);
@@ -384,17 +384,17 @@ function FileProvider() {
     }
 
     /**
-     * 列出所有歌单
-     * @returns {Array<string>} - 返回所有歌单名称的数组
+     * Make a list of all playlists
+     * @returns {Array<string>} - Returns an array of all playlist names
      */
     this.listAllMusicLists = function () {
         return userMusicLists.map(list => list.name);
     }
 
     /**
-     * 获取歌单
-     * @param {string} listName - 歌单名称
-     * @returns {UserMusicList|null} - 返回歌单对象,如果不存在则返回null
+     * Get playlists
+     * @param {string} listName - The name of the playlist
+     * @returns {UserMusicList|null} - Returns a playlist object, or null if it doesn't exist
      */
     this.getMusicList = function (listName) {
         return userMusicLists.find(list => list.name === listName) || null;

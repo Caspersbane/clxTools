@@ -1,18 +1,18 @@
 const { describe, test } = require('node:test');
 const assert = require('node:assert/strict');
-const NoteUtils = require('../src/noteUtils'); // 假设你的 NoteUtils 类在这个文件中
+const NoteUtils = require('../src/noteUtils'); // Let's say your NoteUtils class is in this file
 
 describe('findChordStartAtTime', () => {
     const noteData = [
-        [60, 0, {}],   // 第一组和弦
+        [60, 0, {}],   // The first set of chords
         [62, 0, {}],
         [64, 0, {}],
-        [65, 500, {}], // 第二组和弦
+        [65, 500, {}], // The second set of chords
         [67, 500, {}],
-        [69, 1000, {}], // 第三组和弦（单音符）
-        [71, 1500, {}], // 第四组和弦
+        [69, 1000, {}], // Third group of chords (single note)
+        [71, 1500, {}], // The fourth set of chords
         [72, 1500, {}],
-        [74, 2000, {}], // 第五组和弦
+        [74, 2000, {}], // Fifth set of chords
     ];
 
     test('match first exact', () => {

@@ -6,20 +6,20 @@ let axios = require('axios');
 
 /**
  * @typedef {Object} ChimomoApiFileEntry
- * @property {string} id - 文件的唯一标识符 (uuid)
- * @property {string} name - MIDI文件的名称
- * @property {string} type - 文件类型，貌似不影响使用
- * @property {string} createdAt - 文件创建的日期和时间，格式为 'YYYY-MM-DD HH:mm:ss'
- * @property {string} uploader - 上传者的名称
+ * @property {string} id - A unique identifier for a file (uuid)
+ * @property {string} name - The name of the MIDI file
+ * @property {string} type - The file type does not seem to affect the use
+ * @property {string} createdAt - The date and time when the file was created, in the format 'YYYY-MM-DD HH:mm:ss'
+ * @property {string} uploader - The name of the uploader
  */
 
 /**
  * @typedef {Object} ChimomoApiMusicList
- * @property {number} pageNo - 当前页码
- * @property {number} pageSize - 每页显示的项目数
- * @property {number} pageCount - 总页数
- * @property {number} total - 总项目数
- * @property {ChimomoApiFileEntry[]} data - MIDI文件数据的数组
+ * @property {number} pageNo - The current page number
+ * @property {number} pageSize - The number of items displayed per page
+ * @property {number} pageCount - Total number of pages
+ * @property {number} total - Total number of projects
+ * @property {ChimomoApiFileEntry[]} data - An array of MIDI file data
  */
 
 function ChimomoApi() {
@@ -27,11 +27,11 @@ function ChimomoApi() {
 
 
     /**
-     * @brief 获取音乐列表
-     * @param {number} pageNo 页码
-     * @param {number} pageSize 每页数量
-     * @param {string?} keyword 关键字
-     * @param {(err: Error?, data: ChimomoApiMusicList?) => void} callback 回调函数
+     * @brief Get a list of music
+     * @param {number} pageNo page number
+     * @param {number} pageSize Number per page
+     * @param {string?} keyword keywords
+     * @param {(err: Error?, data: ChimomoApiMusicList?) => void} callback Callback function
      */
     this.fetchMusicList = function (pageNo, pageSize, keyword, callback) {
         const url = `${apiBase}/song/list`;
@@ -41,10 +41,10 @@ function ChimomoApi() {
             keyword
         };
 
-        axios.get(url, { 
+        axios.get(url, {
             params,
             timeout: 5000
-         })
+        })
             .then(response => {
                 if (response.data.code === 200) {
                     callback(null, response.data.data);
@@ -58,8 +58,8 @@ function ChimomoApi() {
     }
 
     /**
-     * @brief 获取音乐文件
-     * @param {string} musicId 音乐ID
+     * @brief Get the music files
+     * @param {string} musicId Music ID
      * @param {(err: Error?, data: import('@tonejs/midi').MidiJSON?) => void} callback 回调函数
      */
     this.fetchMusicFileById = function (musicId, callback) {

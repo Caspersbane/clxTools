@@ -8,7 +8,7 @@
 function requireShared(fileName) {
     const sharedDirRel = "../shared/";
     const cacheDirRel = "./sharedcache/";
-    const alternativeSharedDir = "/sdcard/脚本/clxTools/shared/";
+    const alternativeSharedDir = "/sdcard/script/clxTools/shared/";
     function copyDir(src, dst) {
         let filess = files.listDir(src);
         for (let i = 0; i < filess.length; i++) {
@@ -16,7 +16,7 @@ function requireShared(fileName) {
             if (files.isDir(src + file)) {
                 copyDir(src + file + "/", dst + file + "/");
             } else {
-                console.verbose(`复制文件: ${src + file} -> ${dst + file}`);
+                console.verbose(`Copy the file: ${src + file} -> ${dst + file}`);
                 files.copy(src + file, dst + file);
             }
         }

@@ -55,9 +55,9 @@ function URIUtils_uriToFile(uri) {
   return null;
 }
 
-function getUriFileName(resolver,uri) {
+function getUriFileName(resolver, uri) {
   let returnCursor =
-          resolver.query(uri, null, null, null, null);
+    resolver.query(uri, null, null, null, null);
   let nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
   returnCursor.moveToFirst();
   let name = returnCursor.getString(nameIndex);
@@ -77,7 +77,7 @@ activity.getEventEmitter().on("activity_result", function (requestCode, resultCo
         path = URIUtils_uriToFile(uri);
         console.log("path: " + path);
       } catch (e) {
-        console.warn("无法获取文件路径, 尝试其它方法...");
+        console.warn("Unable to get the file path, try another method...");
       }
       let args = engines.myEngine().execArgv;
       console.log(args);
@@ -91,10 +91,10 @@ activity.getEventEmitter().on("activity_result", function (requestCode, resultCo
               toast("成功");
             }
           } else {
-            //"其它方法"的实现
+            //"Other methods"implementation
             try {
               let is = activity.getContentResolver().openInputStream(uri);
-              let dst = args[1] + getUriFileName(activity.getContentResolver(),uri);
+              let dst = args[1] + getUriFileName(activity.getContentResolver(), uri);
               let os = new java.io.FileOutputStream(dst);
               let buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
               let len;
@@ -104,10 +104,10 @@ activity.getEventEmitter().on("activity_result", function (requestCode, resultCo
               os.flush();
               os.close();
               is.close();
-              toast("成功");
+              toast("succeed");
             } catch (e) {
               console.error(e);
-              toast("失败");
+              toast("fail");
             }
           }
           break;

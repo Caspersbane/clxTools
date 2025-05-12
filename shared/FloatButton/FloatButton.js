@@ -1,10 +1,10 @@
 /*
- * @Author: 大柒
+ * @Author: Daqi
  * @QQ: 531310591@qq.com
  * @Date: 2021-04-18 04:22:51
  * @Version: Auto.Js Pro
- * @Description: 悬浮按钮模块入口
- * @LastEditors: 大柒
+ * @Description: Hover button module entrance
+ * @LastEditors: Daqi
  * @LastEditTime: 2021-04-19 16:44:52
  */
 
@@ -34,37 +34,37 @@ let FloatButton = function () {
     mConfig.isOrientation = fbUtil.isHorizontalScreen();
     mConfig.menuRadius = fbUtil.dp2px(80);
     mConfig.timer = null;
-    //动画
+    //animation
     mConfig.anim = {};
-    //状态
+    //state
     mConfig.state = {};
     mConfig.state.anim = false;
     mConfig.state.menuOpen = false;
     mConfig.state.direction = false;
     mConfig.state.orientation = fbUtil.isHorizontalScreen();
-    //on事件
+    //onevent
     mConfig.eventActions = {};
-    mConfig.eventActions.show = new Function();//显示事件
-    mConfig.eventActions.hide = new Function();//隐藏事件
-    mConfig.eventActions.close = new Function();//关闭事件
-    mConfig.eventActions.item_click = new Function();//点击事件
-    mConfig.eventActions.direction_changed = new Function();//停靠方向改变事件
-    mConfig.eventActions.menu_state_changed = new Function();//菜单状态改变事件
-    mConfig.eventActions.orientation_changed = new Function();//屏幕方向改变事件
-    //时间
+    mConfig.eventActions.show = new Function();//Displays the event
+    mConfig.eventActions.hide = new Function();//Hide events
+    mConfig.eventActions.close = new Function();//Close the event
+    mConfig.eventActions.item_click = new Function();//Click Events
+    mConfig.eventActions.direction_changed = new Function();//Docking direction change event
+    mConfig.eventActions.menu_state_changed = new Function();//Menu state change events
+    mConfig.eventActions.orientation_changed = new Function();//Screen orientation change events
+    //Time
     mConfig.time = {};
-    mConfig.time.menu = 210;//菜单动画时间
-    mConfig.time.show = 500;//logo 显示动画时间
-    mConfig.time.direction = 350;//停靠动画时间
-    mConfig.time.buttonAnim = 210;//按钮切换动画时间
-    mConfig.time.autoCloseMenu = 0;//菜单自动关闭时间
+    mConfig.time.menu = 210;//Menu animation time
+    mConfig.time.show = 500;//logo Displays the animation time
+    mConfig.time.direction = 350;//Docking animation time
+    mConfig.time.buttonAnim = 210;//button to toggle the animation time
+    mConfig.time.autoCloseMenu = 0;//The menu automatically closes the time
 
 
     function FloatButton() {
         mAnim = new Anim(this);
         mConfig.anim.stateChanged = mAnim.stateChanged;
 
-        //监听初始化完成
+        //The listener is initialized
         new ObjectDefinePro(mConfig, 'isInit', (value) => {
             if (value) {
                 for (action of mActions) action();
@@ -76,16 +76,16 @@ let FloatButton = function () {
             mConfig.eventActions[value ? 'show' : 'hide'](value);
         });
 
-        //监听Size变化
+        //Listen for changes in Size
         new ObjectDefinePro(mConfig, 'size', (value) => {
             postAction(() => {
                 for (key in mViewUtils) mViewUtils[key].setSize(value);
-                updateItemCoordinate();//更新坐标
+                updateItemCoordinate();//Update the coordinates
                 updateMenuWindow();
             });
         });
 
-        //监听Padding变化
+        //Listen for padding changes
         new ObjectDefinePro(mConfig, 'padding', (value) => {
             postAction(() => { for (key in mViewUtils) mViewUtils[key].setPadding(value) });
         });
@@ -95,12 +95,12 @@ let FloatButton = function () {
             mConfig.eventActions.menu_state_changed(value);
         });
 
-        // //监听左右停靠方向发生变化
+        // //Listen for changes in the direction of the left and right docks
         new ObjectDefinePro(mConfig.state, 'direction', value => {
             mConfig.eventActions.direction_changed(value);
         });
 
-        //监听屏幕方向发生变化
+        //Listen for the screen orientation to change
         new ObjectDefinePro(mConfig.state, 'orientation', value => {
             if (mConfig.isOrientation == value) return;
             mConfig.isOrientation = value;
@@ -119,7 +119,7 @@ let FloatButton = function () {
             mConfig.eventActions.orientation_changed(value);
         });
 
-        //初始化FloatButton
+        //initializeFloatButton
         initFloatButton();
     }
 
@@ -136,14 +136,14 @@ let FloatButton = function () {
     }
 
     FloatButton.prototype.addItem = function (name) {
-        let viewUtil = new CreateRoundButtonView(name, mConfig);//创建视图
-        mViewUtils[name] = viewUtil;//将工具类保存到集合
-        mMenuViews[name] = viewUtil.getView();//将视图信息保存到集合
+        let viewUtil = new CreateRoundButtonView(name, mConfig);//Create a view
+        mViewUtils[name] = viewUtil;//Save the utility class to the collection
+        mMenuViews[name] = viewUtil.getView();//Save view information to a collection
         postAction(() => {
-            mWindows.menu.content.addView(mMenuViews[name]);//添加视图
-            updateItemCoordinate();//更新坐标
-            updateMenuWindow();//更新悬浮窗
-            mAnim.createAnim(mItemsXY, mMenuViews);//创建动画
+            mWindows.menu.content.addView(mMenuViews[name]);//Add a view
+            updateItemCoordinate();//Update the coordinates
+            updateMenuWindow();//Update the overlay
+            mAnim.createAnim(mItemsXY, mMenuViews);//Create animations
         });
         return viewUtil;
     }
@@ -189,7 +189,7 @@ let FloatButton = function () {
 
     FloatButton.prototype.init = function () {
         if (mConfig.isInit) {
-            toastLog('不要重复初始化!');
+            toastLog('Do not repeat initialization!');
             return;
         }
         initFloatButton();
@@ -252,11 +252,11 @@ let FloatButton = function () {
         ui.isUiThread() ? threads.start(initWindow) : initWindow();
     }
 
-    //初始化悬浮窗
+    //Initialize the floating window
     function initWindow() {
         mWindows.menu = floaty.rawWindow(<frame id='content' w='*' h='*' visibility='invisible' />);
         mWindows.logo = floaty.rawWindow(<frame id='content' w='auto' h='auto' />);
-        //修复 更新悬浮窗LayoutParams 报错
+        //Fixed an error message for updating the LayoutParams overlay
         ui.run(() => {
             mWindows.logo.setSize(-2, -2);
             mWindows.menu.setSize(-2, -2);
@@ -270,19 +270,19 @@ let FloatButton = function () {
             let mx = (mConfig.state.direction ? mConfig.size : -mConfig.size);
             mViewUtils.logo.getView().setTranslationX(mx);
         });
-        //Logo悬浮窗更新
+        //The logo overlay has been updated
         updateLogoWindow();
         createTouchListener(mWindows.logo);
-        //初始化完成
-        //定时器 监听屏幕旋转
-        //广播在7.4.1无法使用
+        //Initialization is complete
+        //Timer Listens for screen rotation
+        //Broadcast is not available in 7.4.1
         setInterval(() => {
             mConfig.state.orientation = fbUtil.isHorizontalScreen();
         }, 500);
         mConfig.isInit = true;
     }
 
-    //更新Logo悬浮窗
+    //Updated the logo overlay
     function updateLogoWindow() {
         mConfig.state.orientation = fbUtil.isHorizontalScreen();
         let x = (mConfig.state.direction ? w - mConfig.size + mConfig.padding : -mConfig.padding);
@@ -290,7 +290,7 @@ let FloatButton = function () {
         mWindows.logo.setPosition(x, y);
     }
 
-    //更新Menu悬浮窗
+    //Updated the Menu overlay
     function updateMenuWindow() {
         let lw = mWindows.logo;
         let size = mConfig.size / 2;
@@ -308,7 +308,7 @@ let FloatButton = function () {
         mWindows.menu.setPosition(x, y);
     }
 
-    //更新item坐标
+    //Update the item coordinates
     function updateItemCoordinate() {
         mItemsXY = [];
         let arr = { x: [], y: [] };

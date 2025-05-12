@@ -1,15 +1,15 @@
 /**
  * @typedef {Object} LyricLine
- * @property {number} time 时间(ms)
- * @property {string} text 歌词
+ * @property {number} time Time(ms)
+ * @property {string} text lyrics
  */
 
 
 function LrcParser() {
     /**
-     * 从LRC歌词文件的字符串中解析出歌词
-     * @param {string} lrcString LRC歌词文件的字符串
-     * @returns {LyricLine[]} 歌词数组
+     * Parse the lyrics from the strings of the LRC lyrics file
+     * @param {string} lrcString The string of the LRC lyrics file
+     * @returns {LyricLine[]} Array of lyrics
      */
     this.parseFromString = function (lrcString) {
         const lines = lrcString.split('\n');
@@ -21,7 +21,7 @@ function LrcParser() {
         for (let line of lines) {
             let trimmedLine = line.trim();
             if (!trimmedLine || trimmedLine.startsWith('[ti:') || trimmedLine.startsWith('[ar:') || trimmedLine.startsWith('[al:')) {
-                continue; // 跳过空行和元数据标签
+                continue; // Skip blank lines and metadata tags
             }
 
             // const matches = [...trimmedLine.matchAll(timeTagRegex)];
@@ -31,12 +31,12 @@ function LrcParser() {
                 matches.push(match);
             }
             if (matches.length === 0) {
-                // 如果没有时间标签,将此行添加到当前文本
+                // If there is no time label, add this line to the current text
                 currentText += (currentText ? '\n' : '') + trimmedLine;
                 continue;
             }
 
-            // 如果有未处理的文本,为最后一个时间标签创建歌词对象
+            // If there is unprocessed text, create a lyric object for the last time tag
             if (currentText) {
                 let lastLyric = lyrics[lyrics.length - 1];
                 if (lastLyric) {
@@ -59,7 +59,7 @@ function LrcParser() {
             }
         }
 
-        // 处理最后一行歌词
+        // Work on the last line of lyrics
         if (currentText) {
             let lastLyric = lyrics[lyrics.length - 1];
             if (lastLyric) {
@@ -71,14 +71,14 @@ function LrcParser() {
     }
 
     /**
-     * @brief 解析一个文件
-     * @param {string} filePath 文件路径
+     * @brief Parse a file
+     * @param {string} filePath File path
      */
     this.parseFile = function (filePath) {
         try {
             return this.parseFromString(files.read(filePath));
         } catch (err) {
-            throw new Error("文件解析失败！请检查格式是否正确, " + err.message);
+            throw new Error("File parsing failed! Please check if the format is correct, " + err.message);
         };
     }
 }

@@ -1,6 +1,6 @@
 const { describe, test } = require('node:test');
 const assert = require('node:assert/strict');
-const MusicFormats = require('../src/musicFormats'); // 假设你的 NoteUtils 类在这个文件中
+const MusicFormats = require('../src/musicFormats'); // Let's say your NoteUtils class is in this file
 
 describe('getFileNameWithoutExtension', () => {
     const musicFormats = new MusicFormats();

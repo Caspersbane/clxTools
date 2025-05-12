@@ -1,10 +1,10 @@
 /*
- * @Author: 大柒
+ * @Author: Daqi
  * @QQ: 531310591@qq.com
  * @Date: 2021-04-18 06:14:13
  * @Version: Auto.Js Pro
- * @Description: 动画模块
- * @LastEditors: 大柒
+ * @Description: Animation module
+ * @LastEditors: Daqi
  * @LastEditTime: 2021-04-19 16:51:34
  */
 
@@ -15,7 +15,7 @@ function Anim(gd) {
     let resources = resources = context.getResources();
     let status_bar_height = resources.getDimensionPixelSize(resources.getIdentifier("status_bar_height", "dimen", "android"));
 
-    //动画方法
+    //Animation methods
     importClass(android.animation.ValueAnimator)
     importClass(android.animation.ObjectAnimator);
     importClass(android.animation.AnimatorSet);
@@ -71,8 +71,8 @@ function Anim(gd) {
     }
 
     /**
-     * 停靠动画
-     * 修复 悬浮球停靠时超出屏幕问题
+     * Dock animation
+     * Fix - Hoverball is out of screen when docked
      * @param {*} x 
      * @param {*} y 
      */
@@ -92,7 +92,7 @@ function Anim(gd) {
             let h = fb.getHeight();
             let w = Math.abs(x - x1);
 
-            //计算Y值是否超出屏幕
+            //Calculate if the Y value is outside the screen
             let isOverstep = null
             if (y < status_bar_height) {
                 y1 = Math.abs(y - status_bar_height);
@@ -124,25 +124,25 @@ function Anim(gd) {
         });
     }
 
-    //菜单动画
+    //Menu animations
     this.menu = function (value, action) {
         action = action || new Function();
         if (data.isMenuOpen == value || data.state.anim) {
             action();
             return;
         };
-        data.state.anim = true;//开启动画占用防止动画多开
+        data.state.anim = true;//Turn on animation occupancy to prevent more animations
         let mw = fb.getWindow('menu');
         let lbv = fb.getView('logo');
         ui.run(() => {
             value ? mw.content.attr("visibility", "visible") : mw.setTouchable(false);
-            //移除定时器
+            //Remove the timer
             if (data.timer != null) {
                 clearTimeout(data.timer);
                 data.timer = null;
             };
             lbv.attr('alpha', 1);
-            //获取要执行的动画集合
+            //Gets the collection of animations you want to execute
             let mAnim = mAnimList[data.state.direction ? 'right' : 'left'][value ? 0 : 1];
             al(pt(mAnim, data.time.menu), () => {
                 if (value) {
@@ -166,15 +166,15 @@ function Anim(gd) {
     }
 
     this.stateChanged = function (state, datas, view) {
-        //强制执行动画 
+        //Enforce animations 
         // data.state.anim = true;
         let e = state ? ['2', '1'] : ['1', '2'];
         let time = data.time.buttonAnim;
         let mColorEvaluator = function (value, colorstr) {
-            view.attr("backgroundTint", colorstr);//改变背景着色
+            view.attr("backgroundTint", colorstr);//Change the background coloring
         }
         let mColorEvaluator1 = function (value, colorstr) {
-            view.attr("tint", colorstr);//改变背景着色
+            view.attr("tint", colorstr);//Change the background coloring
         }
         ui.run(() => {
             let mColorAnim = ObjectAnimator.ofObject(view, "color", new ColorEvaluator(true, mColorEvaluator), datas['color' + e[0]], datas['color' + e[1]]);
@@ -197,7 +197,7 @@ function Anim(gd) {
 
     }
 
-    //创建动画
+    //Create animations
     this.createAnim = function (data, views) {
         mAnimList = { left: [], right: [] };
         mAnimList.left[0] = getAnim(1, true);
@@ -221,31 +221,31 @@ function Anim(gd) {
     }
 
     /**
-     * 颜色过度算法
-     * 参考链接:https://blog.csdn.net/a136447572/article/details/89954075
+     * Color over-algorithm
+     * Reference Links:https://blog.csdn.net/a136447572/article/details/89954075
      */
     function ColorEvaluator(value, action) {
         action = action || new Function();
         let mCurrentRed, mCurrentGreen, mCurrentBlue, mCurrentColor;
 
-        // 在evaluate（）里写入对象动画过渡的逻辑:此处是写颜色过渡的逻辑
+        // Write the logic for the object animation transition in evaluate(): This is the logic for writing the color transition
         this.evaluate = function (fraction, startValue, endValue) {
-            // 获取到颜色的初始值和结束值
+            // Gets the initial and end values of the color
             let startColor = mCurrentColor || startValue;
             let endColor = colors.parseColor(endValue);
 
-            // 通过字符串截取的方式将初始化颜色分为RGB三个部分，并将RGB的值转换成十进制数字
-            // 那么每个颜色的取值范围就是0-255
+            // The initialized color is divided into three parts of RGB by string interception, and the RGB value is converted into decimal numbers
+            // Then the value range of each color is 0-255
             let [startRed, startGreen, startBlue] = [colors.red(startColor), colors.green(startColor), colors.blue(startColor)]
 
             let [endRed, endGreen, endBlue] = [colors.red(endColor), colors.green(endColor), colors.blue(endColor)];
 
-            // 将初始化颜色的值定义为当前需要操作的颜色值
+            // Defines the value of the initialized color as the color value that currently needs to be manipulated
             [mCurrentRed, mCurrentGreen, mCurrentBlue] = [startRed, startGreen, startBlue];
 
-            // 计算初始颜色和结束颜色之间的差值
-            // 该差值决定着颜色变化的快慢:初始颜色值和结束颜色值很相近，那么颜色变化就会比较缓慢;否则,变化则很快
-            // 具体如何根据差值来决定颜色变化快慢的逻辑写在getCurrentColor()里.
+            // Calculate the difference between the initial color and the end color
+            // This difference determines the speed of the color change: if the initial color value and the end color value are very similar, then the color change will be relatively slow; Otherwise, change is fast
+            // The logic of how to determine how fast or slow the color change is based on the difference is written in getCurrentColor().
             var redDiff = Math.abs(startRed - endRed);
             var greenDiff = Math.abs(startGreen - endGreen);
             var blueDiff = Math.abs(startBlue - endBlue);
@@ -261,14 +261,14 @@ function Anim(gd) {
                 mCurrentBlue = getCurrentColor(startBlue, endBlue, colorDiff, redDiff + greenDiff, fraction);
             }
 
-            // 将计算出的当前颜色的值组装返回
+            // The calculated value of the current color is assembled and returned
             var color = colors.rgb(mCurrentRed, mCurrentGreen, mCurrentBlue)
             var currentColor = colors.toString(color);
-            action(value, currentColor, color, colorStr => { mCurrentColor = colorStr }, fraction);//执行回调方法
+            action(value, currentColor, color, colorStr => { mCurrentColor = colorStr }, fraction);//Execute the callback method
             return currentColor;
         }
 
-        // 具体是根据fraction值来计算当前的颜色。
+        // Specifically, the current color is calculated based on the fraction value.
         function getCurrentColor(startColor, endColor, colorDiff, offset, fraction) {
             var currentColor;
             if (startColor > endColor) {

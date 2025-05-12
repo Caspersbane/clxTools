@@ -3,7 +3,7 @@ var midiPitch = require("../midiPitch.js");
 
 
 /**
- * @brief 将一个数值转换到0-1000的另一个区间, 给进度条用
+ * @brief Convert a value to another interval from 0 to 1000 and use it for the progress bar
  * @param {number} value
  * @param {number} min
  * @param {number} max
@@ -18,7 +18,7 @@ function numberMap(value, min, max) {
 }
 
 /**
- * @brief numberMap的对数版本
+ * @brief A logarithmic version of numberMap
  * @param {number} value
  * @param {number} min
  * @param {number} max
@@ -34,7 +34,7 @@ function numberMapLog(value, min, max) {
 }
 
 /**
- * @brief numberMap的反函数
+ * @brief numberMap
  * @param {number} value
  * @param {number} min
  * @param {number} max
@@ -48,7 +48,7 @@ function numberRevMap(value, min, max) {
 }
 
 /**
- * @brief numberMapLog的反函数
+ * @brief numberMapLog
  * @param {number} value
  * @param {number} min
  * @param {number} max
@@ -62,7 +62,7 @@ function numberRevMapLog(value, min, max) {
 }
 
 /**
- * @brief 浮点数比较
+ * @brief Floating-point comparison
  */
 function floatEqual(a, b) {
     return Math.abs(a - b) < 0.000001;
@@ -73,21 +73,21 @@ function floatEqual(a, b) {
  * @readonly
  */
 var ConfigurationFlags = {
-    //设置的详细程度
+    //The level of detail of the setting
     LEVEL_SIMPLE: "LEVEL_SIMPLE",
     LEVEL_ADVANCED: "LEVEL_ADVANCED",
     LEVEL_EXPERT: "LEVEL_EXPERT",
-    //乐曲是否有时长信息
+    //Whether the song has duration information
     MUSIC_HAS_DURATION_INFO: "MUSIC_HAS_DURATION_INFO",
-    //乐曲是否有音轨
+    //Whether the song has an audio track
     MUSIC_HAS_TRACKS: "MUSIC_HAS_TRACKS",
-    //工作模式
+    //Working mode
     WORKMODE_GESTURE_PLAYER: "WORKMODE_GESTURE_PLAYER",
     WORKMODE_INSTRUCT: "WORKMODE_INSTRUCT",
     WORKMODE_MIDI_INPUT_STREAMING: "WORKMODE_MIDI_INPUT_STREAMING",
-    //游戏是否支持时长信息
+    //Whether the game supports duration information
     GAME_HAS_DURATION_INFO: "GAME_HAS_DURATION_INFO",
-    //游戏是否有所有半音
+    //The game has all the semitones
     GAME_HAS_ALL_SEMITONES: "GAME_HAS_ALL_SEMITONES",
 }
 
@@ -95,11 +95,11 @@ var ConfigurationFlags = {
  * @enum {string}
  */
 const ConfigurationCallbacks = {
-    //刷新设置界面
+    //Refresh the settings screen
     refreshConfigurationUi: "refreshConfigurationUi",
-    //运行自动优化
+    //Run automatic optimizations
     runAutoTune: "runAutoTune",
-    //选择音轨
+    //Select the audio track
     selectTracks: "selectTracks",
 }
 
@@ -124,13 +124,13 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
 
     /**
      * @typedef {Object} ConfigurationUiFragment
-     * @property {string} name - 名称
-     * @property {View} view - 界面
+     * @property {string} name - name
+     * @property {View} view - interface
      */
 
     /**
      * @type {Array<ConfigurationUiFragment>}
-     * @brief 设置界面的各个子界面
+     * @brief Sets up the various sub-screens of the interface
      */
     this.fragments = [];
 
@@ -148,8 +148,8 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
      * @param {Object} data 
      */
     function runCallback(callbackName, data) {
-        //不能在ui线程直接调用callback, 否则会导致ui线程阻塞
-        //使用事件机制
+        //You cannot call callback directly on the UI thread, otherwise it will cause the UI thread to block
+        //Use the event mechanism
         evt.emit("callback", callbackName, data);
     }
 
@@ -157,16 +157,16 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
         runCallback(ConfigurationCallbacks.refreshConfigurationUi, {});
     }
 
-    //构造函数开始
+    //The constructor begins
 
-    //文件播放模式的配置
+    //Configuration of file playback mode
     if (this.flags.includes(ConfigurationFlags.WORKMODE_GESTURE_PLAYER) ||
         this.flags.includes(ConfigurationFlags.WORKMODE_INSTRUCT)) {
 
-        //设置等级
+        //Set the level
         let view_configurationLevel = ui.inflate(
             <vertical>
-                <text text="设置等级:" textColor="red" />
+                <text text="Set the level:" textColor="red" />
                 <radiogroup id="levelSelection" orientation="horizontal" padding="0dp" margin="0dp" layout_height="wrap_content">
                     <radio id="levelSelection_simple" text="简单" textSize="12sp" margin="0dp" />
                     <radio id="levelSelection_advanced" text="高级" textSize="12sp" margin="0dp" />
@@ -210,14 +210,14 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
             view: view_configurationLevel
         });
 
-        //运行模式
+        //Mode of operation
         let view_runMode = ui.inflate(
             <vertical>
                 <text text="运行模式:" />
                 <radiogroup id="playerSelection" orientation="horizontal" padding="0dp" margin="0dp" layout_height="wrap_content">
-                    <radio id="playerSelection_AutoJsGesturePlayer" text="自动弹奏" textSize="12sp" margin="0dp" />
-                    <radio id="playerSelection_SimpleInstructPlayer" text="跟弹模式(简易)" textSize="12sp" margin="0dp" />
-                    <radio id="playerSelection_SkyCotlLikeInstructPlayer" text="跟弹模式(类光遇)" textSize="12sp" margin="0dp" />
+                    <radio id="playerSelection_AutoJsGesturePlayer" text="Auto-playing" textSize="12sp" margin="0dp" />
+                    <radio id="playerSelection_SimpleInstructPlayer" text="Follow Mode (Easy)" textSize="12sp" margin="0dp" />
+                    <radio id="playerSelection_SkyCotlLikeInstructPlayer" text="Follow Mode (Similar to Light Encounter)" textSize="12sp" margin="0dp" />
                 </radiogroup>
             </vertical>
         )
@@ -257,38 +257,38 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
             view: view_runMode
         });
 
-        //跟弹模式配置
+        //Follow mode configuration
         if (this.flags.includes(ConfigurationFlags.WORKMODE_INSTRUCT)) {
             if (this.flags.includes(ConfigurationFlags.LEVEL_ADVANCED) ||
                 this.flags.includes(ConfigurationFlags.LEVEL_EXPERT)) {
                 let view_instructMode = ui.inflate(
                     <vertical>
-                        <text text="跟弹模式配置:" textColor="red" />
+                        <text text="Follow mode configuration:" textColor="red" />
                         <horizontal w="*">
-                            {/* 30~300%, 对数, 默认100%*/}
-                            <text text="图案大小: " />
+                            {/* 30~300%, logarithmic, default 100%*/}
+                            <text text="Pattern size: " />
                             <text text="default%" id="SimpleInstructPlayer_MarkSizeValueText" gravity="right|center_vertical" layout_gravity="right|center_vertical" layout_weight="1" />
                         </horizontal>
                         <seekbar id="SimpleInstructPlayer_MarkSizeSeekbar" w="*" max="1000" layout_gravity="center" />
                         <vertical id="SkyCotlLikeInstructPlayerSettingContainer" visibility="gone">
                             <horizontal>
-                                <text text="为每一个音符画出引导线: " />
+                                <text text="Draw a guide line for each note: " />
                                 <checkbox id="SkyCotlLikeInstructPlayer_DrawLineToEachNextKeysCheckbox" />
                             </horizontal>
                             <horizontal>
-                                <text text="为下下一个音符画出引导线: " />
+                                <text text="Draw a guide line for the next note: " />
                                 <checkbox id="SkyCotlLikeInstructPlayer_DrawLineToNextNextKeyCheckbox" />
                             </horizontal>
                             <horizontal>
-                                <text text="将引导圆画在按钮外侧: " />
+                                <text text="Draw the guide circle on the outside of the button: " />
                                 <checkbox id="SkyCotlLikeInstructPlayer_DrawRingOutsideCheckbox" />
                             </horizontal>
                         </vertical>
                         <horizontal height="wrap_content">
-                            <text text="振动效果: " />
+                            <text text="Vibration effects: " />
                             <spinner id="instructVibrationEffectSelector" w="*" entries="关|弱|中|强" />
                         </horizontal>
-                        {/*TODO: 取色器(Android居然没有这个组件?)*/}
+                        {/*TODO: Eyepicker (Android doesn't have this component?)*/}
                     </vertical>
                 );
                 let selectedPlayerTypes = configuration.readGlobalConfig("playerSelection", ["AutoJsGesturePlayer"]);
@@ -330,13 +330,13 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
                     anythingChanged = true;
                     configuration.setGlobalConfig("SkyCotlLikeInstructPlayer_DrawLineToNextNextKey", checked);
                 });
-                
+
                 view_instructMode.SkyCotlLikeInstructPlayer_DrawRingOutsideCheckbox.setOnCheckedChangeListener(function (button, checked) {
                     anythingChanged = true;
                     configuration.setGlobalConfig("SkyCotlLikeInstructPlayer_DrawRingOutside", checked);
                 });
 
-                let instructVibrationEffect = configuration.readGlobalConfig("instructVibrationEffect", 1);  
+                let instructVibrationEffect = configuration.readGlobalConfig("instructVibrationEffect", 1);
                 view_instructMode.instructVibrationEffectSelector.setSelection(instructVibrationEffect);
 
                 view_instructMode.instructVibrationEffectSelector.setOnItemSelectedListener({
@@ -353,10 +353,10 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
             } else if (this.flags.includes(ConfigurationFlags.LEVEL_SIMPLE)) {
                 let view_instructMode = ui.inflate(
                     <vertical>
-                        <text text="跟弹模式配置:" textColor="red" />
+                        <text text="Follow mode configuration:" textColor="red" />
                         <horizontal w="*">
-                            {/* 30~300%, 对数, 默认100%*/}
-                            <text text="图案大小: " />
+                            {/* 30~300%, logarithmic, default 100%*/}
+                            <text text="Pattern size: " />
                             <radiogroup id="SimpleInstructPlayer_MarkSizeSelector" orientation="horizontal" padding="0dp" margin="0dp" layout_height="wrap_content">
                                 <radio id="SimpleInstructPlayer_MarkSizeSelector_65" text="小" textSize="12sp" margin="0dp" />
                                 <radio id="SimpleInstructPlayer_MarkSizeSelector_100" text="中" textSize="12sp" margin="0dp" checked="true" />
@@ -398,12 +398,12 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
             }
         }
 
-        //乐谱可视化
+        //Score visualization
         let view_visualization = ui.inflate(
             <vertical>
-                <text text="乐谱可视化:" />
+                <text text="Score visualization:" />
                 <horizontal>
-                    <text text="使用乐谱可视化:" />
+                    <text text="Use the score visualization:" />
                     <checkbox id="visualizationEnabledCheckbox" />
                 </horizontal>
             </vertical>
@@ -420,22 +420,22 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
             view: view_visualization
         });
 
-        //速度设置
+        //Speed settings
         if (this.flags.includes(ConfigurationFlags.LEVEL_ADVANCED) ||
             this.flags.includes(ConfigurationFlags.LEVEL_EXPERT)) {
             let view_speed = ui.inflate(
                 <vertical>
-                    <text text="速度控制:" textColor="red" />
+                    <text text="Speed control:" textColor="red" />
                     <horizontal>
-                        {/* 5~1500%, 对数, 默认1->不使用 */}
+                        {/* 5~1500%, logarithmic, default 1-> is not used */}
                         <text text="变速:" />
                         <checkbox id="speedMultiplier" />
                         <text text="default%" id="speedMultiplierValueText" gravity="right|center_vertical" layout_gravity="right|center_vertical" layout_weight="1" />
                     </horizontal>
                     <seekbar id="speedMultiplierSeekbar" w="*" max="1000" layout_gravity="center" />
                     <horizontal w="*">
-                        {/* 1~20hz, 对数 , 默认0->不使用*/}
-                        <text text="限制点击速度(在变速后应用):" />
+                        {/* 1~20hz, logarithmic, default 0-> is not used*/}
+                        <text text="Limit click speed (apply after changing speeds):" />
                         <checkbox id="limitClickSpeedCheckbox" />
                         <text text="default次/秒" id="limitClickSpeedValueText" gravity="right|center_vertical" layout_gravity="right|center_vertical" layout_weight="1" />
                     </horizontal>
@@ -444,7 +444,7 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
             let limitClickSpeedHz = configuration.readFileConfig("limitClickSpeedHz", rawFileName, 0);
             let speedMultiplier = configuration.readFileConfig("speedMultiplier", rawFileName, 1);
             view_speed.limitClickSpeedCheckbox.setChecked(limitClickSpeedHz != 0);
-            view_speed.limitClickSpeedValueText.setText(limitClickSpeedHz.toFixed(2) + "次/秒");
+            view_speed.limitClickSpeedValueText.setText(limitClickSpeedHz.toFixed(2) + "times/second");
             view_speed.limitClickSpeedSeekbar.setProgress(numberMapLog(limitClickSpeedHz, 1, 20));
             view_speed.speedMultiplier.setChecked(speedMultiplier != 1);
             view_speed.speedMultiplierValueText.setText((speedMultiplier * 100).toFixed(2) + "%");
@@ -471,7 +471,7 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
                 onProgressChanged: function (seekbar, progress, fromUser) {
                     if (progress == undefined) return;
                     let value = numberRevMapLog(progress, 1, 20);
-                    view_speed.limitClickSpeedValueText.setText(value.toFixed(2) + "次/秒");
+                    view_speed.limitClickSpeedValueText.setText(value.toFixed(2) + "times/second");
                     return true;
                 },
                 onStartTrackingTouch: function (seekbar) { },
@@ -504,14 +504,14 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
         } else if (this.flags.includes(ConfigurationFlags.LEVEL_SIMPLE)) {
             let view_speed = ui.inflate(
                 <vertical>
-                    {/* 这里连个ConstraintLayout都没有,啊啊啊啊 */}
+                    {/* There's not even a ConstraintLayout here, ahhhhh */}
                     <text text="变速:" />
                     <horizontal>
-                        {/* 恢复, -0.25, -0.1, <当前速度>, +0.1, +0.25 */}
+                        {/* Recovery, -0.25, -0.1, <当前速度>, +0.1, +0.25 */}
                         <button id="speedMultiplierReset" text="恢复" margin="0dp" padding="0dp" width="40dp" layout_weight="1" />
                         <button id="speedMultiplierMinus025" text="-0.25" margin="0dp" padding="0dp" width="40dp" layout_weight="1" />
                         <button id="speedMultiplierMinus01" text="-0.1" margin="0dp" padding="0dp" width="40dp" layout_weight="1" />
-                        {/* 加粗字体 */}
+                        {/* Bold font */}
                         <text id="speedMultiplierValueText" textStyle="bold" textSize="20sp" gravity="center_vertical" layout_gravity="center_vertical" layout_weight="2" />
                         <button id="speedMultiplierPlus01" text="+0.1" margin="0dp" padding="0dp" width="40dp" layout_weight="1" />
                         <button id="speedMultiplierPlus025" text="+0.25" margin="0dp" padding="0dp" width="40dp" layout_weight="1" />
@@ -551,37 +551,37 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
             });
         }
 
-        //时长控制
+        //Duration control
         let view_duration = ui.inflate(
             <vertical>
-                <text text="时长优化:" textColor="red" />
-                {/* 音符时长输出模式 */}
+                <text text="Duration optimization:" textColor="red" />
+                {/* Note duration output mode */}
                 <vertical id="noteDurationOutputModeContainer">
                     <horizontal>
-                        <text text="时长输出模式:" />
+                        <text text="Duration output mode:" />
                         <radiogroup id="noteDurationOutputMode" orientation="horizontal" padding="0dp" margin="0dp" layout_height="wrap_content">
-                            <radio id="noteDurationOutputMode_none" text="固定值" textSize="12sp" margin="0dp" />
-                            <radio id="noteDurationOutputMode_native" text="真实时长(实验性)" textSize="12sp" margin="0dp" />
-                            {/* <radio id="noteDurationOutputMode_extraLongKey" text="额外长音按钮" textSize="12sp" margin="0dp" /> */}
+                            <radio id="noteDurationOutputMode_none" text="Fixed value" textSize="12sp" margin="0dp" />
+                            <radio id="noteDurationOutputMode_native" text="Real-world duration (experimental)" textSize="12sp" margin="0dp" />
+                            {/* <radio id="noteDurationOutputMode_extraLongKey" text="Extra long tone button" textSize="12sp" margin="0dp" /> */}
                         </radiogroup>
                     </horizontal>
                 </vertical>
-                <text id="noteDurationOutputModeContainerFallbackText" text="音乐文件没有时长信息, 真实时长模式不可用" textColor="red" visibility="gone" />
+                <text id="noteDurationOutputModeContainerFallbackText" text="Music files do not have duration information, and True Duration mode is not available" textColor="red" visibility="gone" />
                 {/* 默认点击时长 */}
                 <vertical id="defaultClickDurationContainer">
                     <horizontal w="*">
-                        <text text="默认点击时长: " />
+                        <text text="The default click duration: " />
                         {/* <radiogroup id="defaultClickDurationMode" orientation="horizontal" padding="0dp" margin="0dp" layout_height="wrap_content">
-                                 固定的值, 1~500ms, 对数, 默认5ms 
-                                <radio id="defaultClickDurationMode_fixed" text="固定值" textSize="12sp" margin="0dp" selected="true" />
-                                音符间隔的比例, 例如0.5代表点击时长为到下一个音符的间隔的一半. 0.05~0.98, 线性, 默认0.5
-                                <radio id="defaultClickDurationMode_intervalRatio" text="音符间隔比例" textSize="12sp" margin="0dp" />
+                                 Fixed value, 1~500ms, logarithmic, default 5ms 
+                                <radio id="defaultClickDurationMode_fixed" text="Fixed value" textSize="12sp" margin="0dp" selected="true" />
+                                The ratio of the note interval, e.g. 0.5 represents half the click duration to the interval to the next note. 0.05~0.98, linear, default 0.5
+                                <radio id="defaultClickDurationMode_intervalRatio" text="Note interval ratio" textSize="12sp" margin="0dp" />
                             </radiogroup> */}
                         <text text="defaultms" id="defaultClickDurationValueText" gravity="right|center_vertical" layout_gravity="right|center_vertical" layout_weight="1" />
                     </horizontal>
                     <seekbar id="defaultClickDurationSeekbar" w="*" max="1000" layout_gravity="center" />
                 </vertical>
-                {/* 最长手势持续时间: 100~30000ms, 对数, 默认8000ms */}
+                {/* Maximum gesture duration: 100~30000ms, logarithmic, default 8000ms */}
                 <vertical id="maxGestureDurationContainer">
                     <horizontal w="*">
                         <text text="最长手势持续时间: " />
@@ -589,18 +589,18 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
                     </horizontal>
                     <seekbar id="maxGestureDurationSeekbar" w="*" max="1000" layout_gravity="center" />
                 </vertical>
-                {/* 按键间留空时间: 1~600ms, 对数, 默认100ms */}
+                {/* Empty time between keys: 1~600ms, logarithmic, default 100ms */}
                 <vertical id="marginDurationContainer">
                     <horizontal w="*">
-                        <text text="按键间留空时间: " />
+                        <text text="Empty time between keys: " />
                         <text text="defaultms" id="marginDurationValueText" gravity="right|center_vertical" layout_gravity="right|center_vertical" layout_weight="1" />
                     </horizontal>
                     <seekbar id="marginDurationSeekbar" w="*" max="1000" layout_gravity="center" />
                 </vertical>
-                {/* 合并邻近音符, 5~800ms, 对数, 默认50 */}
+                {/* Merge Adjacent Notes, 5~800ms, Logarithmic, Default 50*/}
                 <vertical id="mergeNearbyNotesIntervalContainer">
                     <horizontal w="*">
-                        <text text="邻近音符最大间隔: " />
+                        <text text="Maximum interval between adjacent notes: " />
                         <text text="defaultms" id="mergeNearbyNotesIntervalValueText" gravity="right|center_vertical" layout_gravity="right|center_vertical" layout_weight="1" />
                     </horizontal>
                     <seekbar id="mergeNearbyNotesIntervalSeekbar" w="*" max="1000" layout_gravity="center" />
@@ -616,7 +616,7 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
                 view_duration.noteDurationOutputMode_native.setChecked(true);
                 break;
         }
-        //设置ui可见性
+        //Set UI visibility
         let real_noteDurationOutputMode = noteDurationOutputMode;
         let musicHasDurationInfo = this.flags.includes(ConfigurationFlags.MUSIC_HAS_DURATION_INFO);
         if (!musicHasDurationInfo) {
@@ -636,7 +636,7 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
                 view_duration.marginDurationContainer.setVisibility(View.VISIBLE);
                 break;
         }
-        //在简单模式下隐藏所有滑动条
+        //Hide all sliders in easy mode
         if (this.flags.includes(ConfigurationFlags.LEVEL_SIMPLE)) {
             view_duration.defaultClickDurationContainer.setVisibility(View.GONE);
             view_duration.maxGestureDurationContainer.setVisibility(View.GONE);
@@ -740,41 +740,41 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
                 configuration.setFileConfig("mergeNearbyNotesInterval", value, rawFileName);
             }
         });
-        
+
         this.fragments.push({
             name: "duration",
             view: view_duration
         });
 
-        //音域优化
+        //Vocal range optimization
         let view_range = ui.inflate(
             <vertical>
-                <text text="音域优化:" textColor="red" />
+                <text text="Vocal range optimization:" textColor="red" />
                 {/* <ImageView w="*" h="1dp" bg="#a0a0a0" /> */}
                 <horizontal id="semiToneRoundingModeSettingContainer">
-                    {/* 默认向下取整 */}
-                    <text text="半音取整方法:" layout_gravity="center_vertical" />
+                    {/* Rounded down by default */}
+                    <text text="Chromatic rounding method:" layout_gravity="center_vertical" />
                     <radiogroup id="semiToneRoundingModeSetting" orientation="vertical" padding="0dp" margin="0dp" layout_height="wrap_content">
-                        <radio id="semiToneRoundingModeSetting_roundDown" text="向下取整" textSize="12sp" margin="0dp" />
-                        <radio id="semiToneRoundingModeSetting_roundUp" text="向上取整" textSize="12sp" margin="0dp" />
-                        <radio id="semiToneRoundingModeSetting_drop" text="丢弃半音" textSize="12sp" margin="0dp" />
-                        <radio id="semiToneRoundingModeSetting_both" text="同时上下取整" textSize="12sp" margin="0dp" />
+                        <radio id="semiToneRoundingModeSetting_roundDown" text="Round down" textSize="12sp" margin="0dp" />
+                        <radio id="semiToneRoundingModeSetting_roundUp" text="Round up" textSize="12sp" margin="0dp" />
+                        <radio id="semiToneRoundingModeSetting_drop" text="Discard semitones" textSize="12sp" margin="0dp" />
+                        <radio id="semiToneRoundingModeSetting_both" text="At the same time, round up and down" textSize="12sp" margin="0dp" />
                     </radiogroup>
                 </horizontal>
                 <vertical id="trackDisableThresholdSettingContainer">
                     <horizontal>
                         {/* 1~99%, 线性, 默认50% */}
-                        <text text="自动调整: 禁用音轨阈值(越高->越简单):" />
+                        <text text="Auto-Adjust: Disable track threshold (the higher the - the easier it is to >):" />
                         <text text="default%" id="trackDisableThresholdValueText" gravity="right|center_vertical" layout_gravity="right|center_vertical" layout_weight="1" />
                     </horizontal>
                     <seekbar id="trackDisableThresholdSeekbar" w="*" max="1000" layout_gravity="center" />
                 </vertical>
                 <horizontal>
-                    <button id="autoTuneButton" text="自动优化以下设置" />
+                    <button id="autoTuneButton" text="The following settings are automatically optimized" />
                 </horizontal>
                 <horizontal>
                     {/* -2~2 */}
-                    <text text="升/降八度:" />
+                    <text text="Rise/fall an octave:" />
                     <text text="default" id="majorPitchOffsetValueText" gravity="right|center_vertical" layout_gravity="right|center_vertical" layout_weight="1" />
                     <text text="" id="analyzedMajorPitchOffsetValueText" gravity="right|center_vertical" layout_gravity="right|center_vertical" textColor="black" />
                 </horizontal>
@@ -782,29 +782,29 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
                 <vertical id="minorPitchOffsetSettingContainer">
                     <horizontal>
                         {/* -4~7 */}
-                        <text text="升/降半音(移调):" />
+                        <text text="Ascending/falling semitones (transposing):" />
                         <text text="default" id="minorPitchOffsetValueText" gravity="right|center_vertical" layout_gravity="right|center_vertical" layout_weight="1" />
                         <text text="" id="analyzedMinorPitchOffsetValueText" gravity="right|center_vertical" layout_gravity="right|center_vertical" textColor="black" />
                     </horizontal>
                     <seekbar id="minorPitchOffsetSeekbar" w="*" max="11" layout_gravity="center" />
                 </vertical>
                 <horizontal id="wrapHigherOctaveContainer">
-                    <text text="移动高八度音符到音域内: " />
+                    <text text="Move the upper octave note into the vocal range: " />
                     <checkbox id="wrapHigherOctaveCheckbox" />
                 </horizontal>
                 <horizontal id="wrapLowerOctaveContainer">
-                    <text text="移动低八度音符到音域内: " />
+                    <text text="Move the lower octave notes into the vocal range: " />
                     <checkbox id="wrapLowerOctaveCheckbox" />
                 </horizontal>
                 <horizontal id="trackSelectionContainer">
-                    <text text="音轨选择:" />
-                    <button id="selectTracksButton" text="选择..." padding="0dp" />
+                    <text text="Track selection:" />
+                    <button id="selectTracksButton" text="choose..." padding="0dp" />
                 </horizontal>
-                <text text="当前的音乐文件没有音轨信息, 选择音轨不可用" id="trackSelectionContainerFallbackText" textColor="red" visibility="gone" />
+                <text text="The current music file has no track information, and the selected track is not available" id="trackSelectionContainerFallbackText" textColor="red" visibility="gone" />
             </vertical>
         );
 
-        //在简单模式下隐藏菜单
+        //Hide the menu in simple mode
         if (this.flags.includes(ConfigurationFlags.LEVEL_SIMPLE)) {
             view_range.semiToneRoundingModeSettingContainer.setVisibility(View.GONE);
             view_range.trackDisableThresholdSettingContainer.setVisibility(View.GONE);
@@ -812,13 +812,13 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
             view_range.wrapHigherOctaveContainer.setVisibility(View.GONE);
             view_range.wrapLowerOctaveContainer.setVisibility(View.GONE);
         }
-        //如果游戏有所有半音, 隐藏移调设置
+        //If the game has all semitones, hide the transpose setting
         if (this.flags.includes(ConfigurationFlags.GAME_HAS_ALL_SEMITONES)) {
             view_range.semiToneRoundingModeSettingContainer.setVisibility(View.GONE);
             view_range.autoTuneButton.setVisibility(View.GONE);
             view_range.minorPitchOffsetSettingContainer.setVisibility(View.GONE);
         }
-        //如果没有音轨信息, 隐藏音轨选择
+        //If there is no audio track information, hide the audio track selection
         if (!this.flags.includes(ConfigurationFlags.MUSIC_HAS_TRACKS)) {
             view_range.trackSelectionContainer.setVisibility(View.GONE);
             view_range.trackSelectionContainerFallbackText.setVisibility(View.VISIBLE);
@@ -840,25 +840,25 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
                 view_range.semiToneRoundingModeSetting_both.setChecked(true);
                 break;
         }
-        let trackDisableThreshold = 0.5; //不会保存
+        let trackDisableThreshold = 0.5; //It will not be saved
         view_range.trackDisableThresholdValueText.setText((trackDisableThreshold * 100).toFixed(2) + "%");
         view_range.trackDisableThresholdSeekbar.setProgress(numberMap(trackDisableThreshold * 100, 1, 99));
         let majorPitchOffset = configuration.readFileConfigForTarget("majorPitchOffset", rawFileName, gameProfile, 0);
         view_range.majorPitchOffsetValueText.setText(majorPitchOffset.toFixed(0));
         view_range.majorPitchOffsetSeekbar.setProgress(majorPitchOffset + 2);
-        let analyzedMajorPitchOffset = configuration.readFileConfigForTarget("analyzedMajorPitchOffset", rawFileName,gameProfile);
+        let analyzedMajorPitchOffset = configuration.readFileConfigForTarget("analyzedMajorPitchOffset", rawFileName, gameProfile);
         if (analyzedMajorPitchOffset != undefined) {
-            view_range.analyzedMajorPitchOffsetValueText.setText(` (推荐: ${analyzedMajorPitchOffset.toFixed(0)})`);
+            view_range.analyzedMajorPitchOffsetValueText.setText(` (recommend: ${analyzedMajorPitchOffset.toFixed(0)})`);
         }
         let minorPitchOffset = configuration.readFileConfigForTarget("minorPitchOffset", rawFileName, gameProfile, 0);
         view_range.minorPitchOffsetValueText.setText(`${minorPitchOffset.toFixed(0)} (${midiPitch.getTranspositionEstimatedKey(minorPitchOffset)})`);
         view_range.minorPitchOffsetSeekbar.setProgress(minorPitchOffset + 4);
-        let analyzedMinorPitchOffset = configuration.readFileConfigForTarget("analyzedMinorPitchOffset", rawFileName,gameProfile);
+        let analyzedMinorPitchOffset = configuration.readFileConfigForTarget("analyzedMinorPitchOffset", rawFileName, gameProfile);
         if (analyzedMinorPitchOffset != undefined) {
-            view_range.analyzedMinorPitchOffsetValueText.setText(` (推荐: ${analyzedMinorPitchOffset.toFixed(0)})`);
+            view_range.analyzedMinorPitchOffsetValueText.setText(` (recommend: ${analyzedMinorPitchOffset.toFixed(0)})`);
         }
         let wrapHigherOctave = configuration.readFileConfigForTarget("wrapHigherOctave", rawFileName, gameProfile, 1);
-        view_range.wrapHigherOctaveCheckbox.setChecked(wrapHigherOctave > 0);  //居然不会自动转换成bool
+        view_range.wrapHigherOctaveCheckbox.setChecked(wrapHigherOctave > 0);  //It doesn't automatically convert to bool
         let wrapLowerOctave = configuration.readFileConfigForTarget("wrapLowerOctave", rawFileName, gameProfile, 0);
         view_range.wrapLowerOctaveCheckbox.setChecked(wrapLowerOctave > 0);
 
@@ -948,33 +948,33 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
             view: view_range
         });
 
-        //和弦优化
+        //Chord optimization
         if (this.flags.includes(ConfigurationFlags.LEVEL_ADVANCED) ||
             this.flags.includes(ConfigurationFlags.LEVEL_EXPERT)) {
             let view_chord = ui.inflate(
                 <vertical>
                     <horizontal w="*">
-                        <text text="和弦优化:" textColor="red" />
+                        <text text="Chord optimization:" textColor="red" />
                         <checkbox id="chordLimitCheckbox" />
                     </horizontal>
                     <vertical id="chordLimitSettingContainer">
                         <horizontal w="*">
                             <text text="最多同时按键数量: " />
-                            {/* 1-9个, 默认2 */}
+                            {/* 1-9, default 2*/}
                             <text text="default个" id="maxSimultaneousNoteCountValueText" gravity="right|center_vertical" layout_gravity="right|center_vertical" layout_weight="1" />
                         </horizontal>
                         <seekbar id="maxSimultaneousNoteCountSeekbar" w="*" max="1000" layout_gravity="center" />
                         <horizontal>
-                            {/* 默认向下取整 */}
-                            <text text="按键数量限制方法: " layout_gravity="center_vertical" />
+                            {/* Rounded down by default */}
+                            <text text="How to limit the number of buttons: " layout_gravity="center_vertical" />
                             <radiogroup id="noteCountLimitMode" orientation="horizontal" padding="0dp" margin="0dp" layout_height="wrap_content">
-                                <radio id="noteCountLimitMode_delete" text="删除超出的" textSize="12sp" margin="0dp" />
-                                <radio id="noteCountLimitMode_split" text="拆分成多组" textSize="12sp" margin="0dp" />
+                                <radio id="noteCountLimitMode_delete" text="Delete the exceeded" textSize="12sp" margin="0dp" />
+                                <radio id="noteCountLimitMode_split" text="Split into multiple groups" textSize="12sp" margin="0dp" />
                             </radiogroup>
                         </horizontal>
                         <horizontal w="*">
                             <text text="拆分成多组时组间间隔: " />
-                            {/* 5-500ms, 对数, 默认75ms */}
+                            {/* 5-500ms, logarithmic, default 75ms */}
                             <text text="defaultms" id="noteCountLimitSplitDelayValueText" gravity="right|center_vertical" layout_gravity="right|center_vertical" layout_weight="1" />
                         </horizontal>
                         <seekbar id="noteCountLimitSplitDelaySeekbar" w="*" max="1000" layout_gravity="center" />
@@ -1092,10 +1092,10 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
                 <vertical>
                     <text text="和弦优化:" textColor="red" />
                     <radiogroup id="maxSimultaneousNoteCountSelector" orientation="horizontal" padding="0dp" margin="0dp" layout_height="wrap_content">
-                        <radio id="maxSimultaneousNoteCountSelector_1" text="1指" textSize="12sp" margin="0dp" />
-                        <radio id="maxSimultaneousNoteCountSelector_2" text="2指" textSize="12sp" margin="0dp" />
-                        <radio id="maxSimultaneousNoteCountSelector_3" text="3指" textSize="12sp" margin="0dp" />
-                        <radio id="maxSimultaneousNoteCountSelector_9" text="不限" textSize="12sp" margin="0dp" checked="true" />
+                        <radio id="maxSimultaneousNoteCountSelector_1" text="1 finger" textSize="12sp" margin="0dp" />
+                        <radio id="maxSimultaneousNoteCountSelector_2" text="2 fingers" textSize="12sp" margin="0dp" />
+                        <radio id="maxSimultaneousNoteCountSelector_3" text="3 fingers" textSize="12sp" margin="0dp" />
+                        <radio id="maxSimultaneousNoteCountSelector_9" text="Unlimited" textSize="12sp" margin="0dp" checked="true" />
                     </radiogroup>
                 </vertical>
             );
@@ -1147,22 +1147,22 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
             });
         }
 
-        //伪装手弹
+        //Camouflage handballs
         if (this.flags.includes(ConfigurationFlags.LEVEL_ADVANCED) ||
             this.flags.includes(ConfigurationFlags.LEVEL_EXPERT)) {
             let view_humanify = ui.inflate(
                 <vertical>
-                    <text text="伪装手弹(全局):" textColor="red" />
+                    <text text="Camouflage Hand Bullet (Global):" textColor="red" />
                     <horizontal w="*">
-                        {/* 5~150ms, 线性, 默认0->不使用*/}
-                        <text text="音符时间偏差: " />
+                        {/* 5~150ms, linear, default 0-> not used*/}
+                        <text text="Note timing deviation: " />
                         <checkbox id="noteTimeDeviationCheckbox" />
                         <text text="defaultms" id="noteTimeDeviationValueText" gravity="right|center_vertical" layout_gravity="right|center_vertical" layout_weight="1" />
                     </horizontal>
                     <seekbar id="noteTimeDeviationSeekbar" w="*" max="1000" layout_gravity="center" />
                     <horizontal w="*">
-                        {/* 0~6mm, 线性, 默认1*/}
-                        <text text="点击位置偏差: " />
+                        {/* 0~6mm, linear, default 1*/}
+                        <text text="Click Position Deviation: " />
                         <text text="defaultmm" id="clickPositionDeviationValueText" gravity="right|center_vertical" layout_gravity="right|center_vertical" layout_weight="1" />
                     </horizontal>
                     <seekbar id="clickPositionDeviationSeekbar" w="*" max="1000" layout_gravity="center" />
@@ -1218,22 +1218,22 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
             });
         }
 
-        //跳过空白
+        //Skip the blanks
         let view_skipBlank = ui.inflate(
             <vertical>
-                <text text="跳过空白:" textColor="red" />
+                <text text="Skip the blanks:" textColor="red" />
                 <horizontal w="*">
-                    <text text="跳过前奏空白: " />
+                    <text text="Skip the intro blanks: " />
                     <checkbox id="skipInitEnabledCheckbox" />
                 </horizontal>
                 <horizontal w="*">
-                    <text text="跳过中间空白: " />
+                    <text text="Skip the middle blank: " />
                     <checkbox id="skipBlank5sEnabledCheckbox" />
                 </horizontal>
             </vertical>
         );
         let skipInitEnabled = configuration.readGlobalConfig("skipInit", false);
-        view_skipBlank.skipInitEnabledCheckbox.setChecked(skipInitEnabled ? true : false); //不知道为什么这里可能会返回number
+        view_skipBlank.skipInitEnabledCheckbox.setChecked(skipInitEnabled ? true : false); //Not sure why number might be returned here
         let skipBlank5sEnabled = configuration.readGlobalConfig("skipBlank5s", false);
         view_skipBlank.skipBlank5sEnabledCheckbox.setChecked(skipBlank5sEnabled ? true : false);
 
@@ -1258,22 +1258,22 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
             <vertical>
                 <text text="音域优化:" textColor="red" />
                 {/* <horizontal id="semiToneRoundingModeSettingContainer">
-                    <text text="半音取整方法:" layout_gravity="center_vertical" />
+                    <text text="Chromatic rounding method:" layout_gravity="center_vertical" />
                     <radiogroup id="semiToneRoundingModeSetting" orientation="vertical" padding="0dp" margin="0dp" layout_height="wrap_content">
-                        <radio id="semiToneRoundingModeSetting_roundDown" text="向下取整" textSize="12sp" margin="0dp" />
-                        <radio id="semiToneRoundingModeSetting_roundUp" text="向上取整" textSize="12sp" margin="0dp" />
-                        <radio id="semiToneRoundingModeSetting_drop" text="丢弃半音" textSize="12sp" margin="0dp" />
-                        <radio id="semiToneRoundingModeSetting_both" text="同时上下取整" textSize="12sp" margin="0dp" />
+                        <radio id="semiToneRoundingModeSetting_roundDown" text="Round down" textSize="12sp" margin="0dp" />
+                        <radio id="semiToneRoundingModeSetting_roundUp" text="Round up" textSize="12sp" margin="0dp" />
+                        <radio id="semiToneRoundingModeSetting_drop" text="Discard semitones" textSize="12sp" margin="0dp" />
+                        <radio id="semiToneRoundingModeSetting_both" text="At the same time, round up and down" textSize="12sp" margin="0dp" />
                     </radiogroup>
                 </horizontal> */}
                 <horizontal>
-                    <text text="升/降八度:" />
+                    <text text="升/Octave down:" />
                     <text text="default" id="majorPitchOffsetValueText" gravity="right|center_vertical" layout_gravity="right|center_vertical" layout_weight="1" />
                 </horizontal>
                 <seekbar id="majorPitchOffsetSeekbar" w="*" max="4" layout_gravity="center" />
                 <vertical id="minorPitchOffsetSettingContainer">
                     <horizontal>
-                        <text text="升/降半音(移调):" />
+                        <text text="Ascending/falling semitones (transposing):" />
                         <text text="default" id="minorPitchOffsetValueText" gravity="right|center_vertical" layout_gravity="right|center_vertical" layout_weight="1" />
                     </horizontal>
                     <seekbar id="minorPitchOffsetSeekbar" w="*" max="11" layout_gravity="center" />
@@ -1281,7 +1281,7 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
             </vertical>
         );
 
-        //TODO: 流处理的半音取整方法
+        //TODO: Chromatic rounding method for stream processing
         // let semiToneRoundingMode = configuration.readGlobalConfig("MIDIInputStreaming_semiToneRoundingMode", 0);
         // switch (semiToneRoundingMode) {
         //     case 0:
@@ -1359,14 +1359,14 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
         });
 
         let view_fakeSustain = ui.inflate(<vertical>
-            <text text="伪装长音:" textColor="red" />
+            <text text="Camouflage long tones:" textColor="red" />
             <horizontal w="*">
-                <text text="使用连续点击伪装长音: " />
+                <text text="Use continuous taps to disguise long tones: " />
                 <checkbox id="fakeSustainEnabledCheckbox" />
             </horizontal>
             <vertical id="fakeSustainSettingContainer">
                 <horizontal w="*">
-                    <text text="连续点击速度: " />
+                    <text text="Continuous click speed: " />
                     <text text="default次/秒" id="fakeSustainIntervalValueText" gravity="right|center_vertical" layout_gravity="right|center_vertical" layout_weight="1" />
                 </horizontal>
                 <seekbar id="fakeSustainIntervalSeekbar" w="*" max="1000" layout_gravity="center" />
@@ -1391,7 +1391,7 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
             onProgressChanged: function (seekbar, progress, fromUser) {
                 if (progress == undefined) return;
                 let value = numberRevMap(progress, 1, 20);
-                view_fakeSustain.fakeSustainIntervalValueText.setText(value.toFixed(2) + "次/秒");
+                view_fakeSustain.fakeSustainIntervalValueText.setText(value.toFixed(2) + "times/second");
                 return true;
             },
             onStartTrackingTouch: function (seekbar) { },
@@ -1411,7 +1411,7 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
 
 
     /**
-     * @brief 获取配置界面的View
+     * @brief Obtain the view of the configuration page
      * @returns {View}
      */
     this.getView = function () {
@@ -1435,7 +1435,7 @@ function ConfigurationUi(rawFileName, gameProfile, flags, callback) {
     }
 
     /**
-     * @brief 是否有任何配置被修改
+     * @brief Whether any configuration has been modified
      */
     this.isAnythingChanged = function () {
         return anythingChanged;

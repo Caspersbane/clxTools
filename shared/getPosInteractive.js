@@ -1,8 +1,8 @@
 function getPosInteractive(promptText) {
     let gotPos = false;
-    //pos[0] 宽, pos[1] 高
+    //pos[0] wide, pos[1] high
     let pos = [0, 0];
-    //悬浮窗内部坐标
+    //Coordinates of the interior of the floating window
     let windowPos = [0, 0];
     let fingerReleased = false;
     let confirmed = false;
@@ -12,7 +12,7 @@ function getPosInteractive(promptText) {
     let deviceHeight = context.getResources().getDisplayMetrics().heightPixels;
 
     console.log("getPosInteractive(): " + promptText);
-    //提示和确认按钮的框
+    // Prompt and confirm button box
     let confirmWindow = floaty.rawWindow(
         <frame gravity="left|top">
             <vertical bg="#7fffff7f">
@@ -55,17 +55,17 @@ function getPosInteractive(promptText) {
             canvasDebugCounter = -1;
         }
 
-        //灰色背景
+        //Gray background
         canvas.drawColor(Color.parseColor("#3f000000"), PorterDuff.Mode.SRC);
         if (gotPos) {
-            //画十字定位线
+            //Draw a cross location line
             paint.setStrokeWidth(2);
             paint.setARGB(255, 255, 255, 255);
             paint.setStyle(Paint.Style.STROKE);
             canvas.drawLine(0, windowPos[1], w, windowPos[1], paint);
             canvas.drawLine(windowPos[0], 0, windowPos[0], h, paint);
 
-            //中心画一个空心圆
+            //Draw a hollow circle in the center
             paint.setStyle(Paint.Style.STROKE);
             canvas.drawCircle(windowPos[0], windowPos[1], centerCircleRadius, paint);
         }
@@ -75,7 +75,7 @@ function getPosInteractive(promptText) {
 
 
     ui.run(() => {
-        confirmWindow.promptText.setText("请点击" + promptText);
+        confirmWindow.promptText.setText("Please click" + promptText);
         confirmWindow.confirmBtn.click(() => {
             confirmed = true;
         });
@@ -94,11 +94,11 @@ function getPosInteractive(promptText) {
 
         ui.run(function () {
             if (!gotPos) {
-                confirmWindow.promptText.setText("请点击" + promptText);
+                confirmWindow.promptText.setText("Please click" + promptText);
             } else if (!fingerReleased) {
-                confirmWindow.promptText.setText("当前坐标:" + pos.toString());
+                confirmWindow.promptText.setText("Current coordinates:" + pos.toString());
             } else {
-                confirmWindow.promptText.setText("当前坐标:" + pos.toString() + ", 点击'确定'结束, 点击'取消'重新获取");
+                confirmWindow.promptText.setText("Current coordinates:" + pos.toString() + ", Click 'OK' to finish, click 'Cancel' to re-acquire");
             }
         });
     }
